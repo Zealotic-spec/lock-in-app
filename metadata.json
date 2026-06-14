@@ -1,0 +1,6 @@
+{
+  "name": "Lock In Productivity Tracker",
+  "description": "A feature-rich productivity tracker with native styling, customizable themes, Notion-style diary, custom avatars, and desktop background tracking architecture.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
