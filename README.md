@@ -1,20 +1,16 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
-
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/9413a033-bdc0-4546-9dd4-33fa91368f35
-
-## Run Locally
-
-**Prerequisites:**  Node.js
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+# Lets use Lock-in and achieve our goals.
+
+# Lock In
+
+Lock In is a desktop productivity app built with Electron and React. It helps users stay focused, track deep work sessions, monitor progress, and build discipline through consistent daily effort.
+
+## Features
+
+- Focus sessions
+- Goal tracking
+- Progress analytics
+- Session history
+- Modern dark UI
+- Cross-platform support

@@ -1164,7 +1164,7 @@ export default function App() {
                 transition={{ duration: 0.25 }}
                 className="dash-layout w-full text-center"
               >
-                <div className="max-w-2xl mx-auto flex flex-col items-center">
+                <div className="w-full min-h-screen flex flex-col items-center justify-start mx-auto px-4 self-center justify-self-center">
                   <h2 className="text-2xl font-black text-[var(--text)] tracking-tight mb-1">АНАЛИТИКА ПРОДУКТИВНОСТИ</h2>
                   <p className="text-xs text-[var(--muted)] mb-6 tracking-wider uppercase">Индикаторы работы вашего мозга за текущую неделю</p>
 
@@ -1231,32 +1231,36 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="dash-grid w-full">
-                    <div className="dash-card theme-transition">
-                      <span className="dash-lbl">МИНУТ ЗА НЕДЕЛЮ</span>
-                      <span className="dash-val highlight">{stats.weekMinutes}м</span>
-                    </div>
-                    <div className="dash-card theme-transition">
-                      <span className="dash-lbl">МИНУТ СЕГОДНЯ</span>
-                      <span className="dash-val highlight">{stats.todayMinutes}м</span>
-                    </div>
-                    <div className="dash-card theme-transition">
-                      <span className="dash-lbl">ФОКУС-СТРИК</span>
-                      <span className="dash-val orange">🔥 {stats.streak} дн</span>
-                    </div>
-                    <div className="dash-card theme-transition">
-                      <span className="dash-lbl">ПИКОВАЯ АКТИВНОСТЬ</span>
-                      <span className="dash-val text-[var(--text)]">{dashMetrics.bestDay}</span>
-                    </div>
-                    <div className="dash-card theme-transition">
-                      <span className="dash-lbl">СРЕДНЯЯ СЕССИЯ</span>
-                      <span className="dash-val text-[var(--text)]">{dashMetrics.avgMin}м</span>
-                    </div>
-                    <div className="dash-card theme-transition">
-                      <span className="dash-lbl">ПРЕДПОЧТИТЕЛЬНЫЙ ТЕГ</span>
-                      <span className="dash-val text-[var(--text)]">{dashMetrics.topTag}</span>
-                    </div>
-                  </div>
+                  {/* Убираем старый класс dash-grid и создаём изолированную сетку.
+        grid-cols-1 — на мелких экранах блоки идут в 1 колонку.
+        md:grid-cols-3 — на нормальных экранах ЖЁСТКО строим сетку 3х2 (по 3 блока в ряд).
+      */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        <div className="dash-card theme-transition">
+          <span className="dash-lbl">МИНУТ ЗА НЕДЕЛЮ</span>
+          <span className="dash-val highlight">{stats.weekMinutes}м</span>
+        </div>
+        <div className="dash-card theme-transition">
+          <span className="dash-lbl">МИНУТ СЕГОДНЯ</span>
+          <span className="dash-val highlight">{stats.todayMinutes}м</span>
+        </div>
+        <div className="dash-card theme-transition">
+          <span className="dash-lbl">ФОКУС-СТРИК</span>
+          <span className="dash-val orange">🔥 {stats.streak} дн</span>
+        </div>
+        <div className="dash-card theme-transition">
+          <span className="dash-lbl">ПИКОВАЯ АКТИВНОСТЬ</span>
+          <span className="dash-val text-[var(--text)]">{dashMetrics.bestDay}</span>
+        </div>
+        <div className="dash-card theme-transition">
+          <span className="dash-lbl">СРЕДНЯЯ СЕССИЯ</span>
+          <span className="dash-val text-[var(--text)]">{dashMetrics.avgMin}м</span>
+        </div>
+        <div className="dash-card theme-transition">
+          <span className="dash-lbl">ПРЕДПОЧТИТЕЛЬНЫЙ ТЕГ</span>
+          <span className="dash-val text-[var(--text)]">{dashMetrics.topTag}</span>
+        </div>
+      </div>
                 </div>
               </motion.div>
             )}
@@ -1271,12 +1275,12 @@ export default function App() {
                 transition={{ duration: 0.25 }}
                 className="hist-layout w-full text-center"
               >
-                <div className="max-w-xl mx-auto">
+                <div className="w-full min-h-screen flex flex-col items-center justify-start mx-auto pt-10 px-4 self-center justify-self-center">
                   <h2 className="text-2xl font-black text-[var(--text)] tracking-tight mb-1">ЖУРНАЛ СЕССИЙ</h2>
                   <p className="text-xs text-[var(--muted)] mb-6 uppercase tracking-wide">Ранее зафиксированная история вашей концентрации</p>
                   
                   {history.length === 0 ? (
-                    <div className="text-center py-20 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
+                    <div className="text-center py-16 px-8 max-w-md mx-auto bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
                       <Award size={36} className="mx-auto mb-4 text-[var(--muted)] opacity-50" />
                       <p className="text-sm font-bold text-[var(--text)]">Журнал сессий пуст</p>
                       <p className="text-xs text-[var(--muted)] mt-1">Запустите таймер, завершите фокус и сохраните данные здесь.</p>
@@ -1341,7 +1345,7 @@ export default function App() {
                 transition={{ duration: 0.25 }}
                 className="settings-layout w-full text-center"
               >
-                <div className="max-w-lg mx-auto text-left">
+                <div className="w-full max-w-2xl mx-auto px-4 text-left">
                   <h2 className="text-2xl font-black text-center text-[var(--text)] tracking-tight mb-1">НАСТРОЙКИ</h2>
                   <p className="text-xs text-center text-[var(--muted)] mb-6 uppercase tracking-wide">Конфигурация профайла и кастомизация палитр</p>
 
@@ -1398,7 +1402,7 @@ export default function App() {
                       {editingName ? (
                         <div className="flex gap-2">
                           <input 
-                            className="settings-input flex-1" 
+                            className="settings-input flex-1 bg-[var(--bg-el)] text-[var(--text)] font-extrabold px-4 py-2.5 rounded-xl border border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 focus:ring-offset-[var(--bg)] min-w-0 w-full" 
                             value={nameDraft} 
                             autoFocus
                             onChange={e => setNameDraft(e.target.value)}

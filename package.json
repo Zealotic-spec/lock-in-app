@@ -16,6 +16,7 @@
   "build": {
     "appId": "com.zealotic.lockin",
     "productName": "Lock In",
+    "icon": "build/icon.png",
     "win": {
       "target": "nsis"
     },
