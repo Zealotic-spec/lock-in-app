@@ -400,6 +400,29 @@ export default function App() {
   useEffect(() => { lsSet("lockin_avatar",   userAvatar);  }, [userAvatar]);
   useEffect(() => { lsSet("lockin_custom_avatar", customAvatar); }, [customAvatar]);
 
+  // ── SYNC THEME TO HTML ROOT (чтобы темы работали и в вебе и в Electron) ──
+  useEffect(() => {
+    // Убираем все старые классы тем с html элемента
+    const html = document.documentElement;
+    html.classList.remove("theme-dark", "theme-light", "theme-cyber", "theme-emerald", "theme-nord");
+    html.classList.add(`theme-${colorTheme}`);
+    // Также применяем CSS переменные напрямую на body для надёжности
+    const themes: Record<string, Record<string, string>> = {
+      dark:    { "--bg": "#000000", "--bg-card": "rgba(12,12,16,0.75)", "--bg-el": "rgba(25,25,32,0.6)", "--border": "rgba(255,255,255,0.06)", "--text": "#f8fafc", "--muted": "#52525b", "--accent": "#06b6d4", "--accent-glow": "rgba(6,182,212,0.25)", "--accent-secondary": "#a855f7", "--shadow-color": "rgba(0,0,0,0.8)" },
+      light:   { "--bg": "#f4f4f7", "--bg-card": "rgba(255,255,255,0.75)", "--bg-el": "rgba(228,228,231,0.7)", "--border": "rgba(0,0,0,0.06)", "--text": "#09090b", "--muted": "#71717a", "--accent": "#007aff", "--accent-glow": "rgba(0,122,255,0.15)", "--accent-secondary": "#30d158", "--shadow-color": "rgba(0,0,0,0.06)" },
+      cyber:   { "--bg": "#000000", "--bg-card": "rgba(10,0,20,0.8)", "--bg-el": "rgba(30,0,50,0.5)", "--border": "rgba(255,0,127,0.15)", "--text": "#f8fafc", "--muted": "#8c7ea8", "--accent": "#ff007f", "--accent-glow": "rgba(255,0,127,0.3)", "--accent-secondary": "#00f0ff", "--shadow-color": "rgba(0,0,0,0.9)" },
+      emerald: { "--bg": "#000000", "--bg-card": "rgba(5,15,10,0.8)", "--bg-el": "rgba(15,35,22,0.5)", "--border": "rgba(16,185,129,0.12)", "--text": "#f0fdf4", "--muted": "#627d6f", "--accent": "#10b981", "--accent-glow": "rgba(16,185,129,0.3)", "--accent-secondary": "#fbbf24", "--shadow-color": "rgba(0,0,0,0.9)" },
+      nord:    { "--bg": "#1c212c", "--bg-card": "rgba(46,52,64,0.55)", "--bg-el": "rgba(67,76,94,0.45)", "--border": "rgba(136,192,208,0.15)", "--text": "#eceff4", "--muted": "#9ba4b5", "--accent": "#88c0d0", "--accent-glow": "rgba(136,192,208,0.25)", "--accent-secondary": "#81a1c1", "--shadow-color": "rgba(15,18,25,0.7)" },
+    };
+    const vars = themes[colorTheme] || themes.dark;
+    Object.entries(vars).forEach(([k, v]) => {
+      document.documentElement.style.setProperty(k, v);
+      document.body.style.setProperty(k, v);
+    });
+    document.body.style.background = vars["--bg"];
+    document.body.style.color = vars["--text"];
+  }, [colorTheme]);
+
   // Закрытие меню выбора тегов кликом вне меню
   useEffect(() => {
     const h = () => setTagDropId(null);
@@ -935,19 +958,20 @@ export default function App() {
                     )}
                   </div>
 
-                  {!isActive && (
-                    <div className="intensity-row">
-                      {Object.keys(INTENSITY_PRESETS).map(mode => (
-                        <button 
-                          key={mode} 
-                          className={`intensity-pill ${intensity === mode ? "active" : ""} theme-transition`}
-                          onClick={() => handleIntensity(mode)}
-                        >
-                          {mode}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  {/* Теги режима — всегда видны, при активном таймере заблокированы */}
+                  <div className="intensity-row">
+                    {Object.keys(INTENSITY_PRESETS).map(mode => (
+                      <button 
+                        key={mode} 
+                        className={`intensity-pill ${intensity === mode ? "active" : ""} ${isActive ? "locked" : ""} theme-transition`}
+                        onClick={() => handleIntensity(mode)}
+                        disabled={isActive}
+                        title={isActive ? "Остановите таймер чтобы сменить режим" : ""}
+                      >
+                        {mode}
+                      </button>
+                    ))}
+                  </div>
 
                   <div className="timer-section">
                     <div className="timer-wrap">

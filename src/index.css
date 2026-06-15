@@ -8,79 +8,83 @@
   --transition-speed: 0.4s;
 }
 
-/* ─── ПЕРЕМЕННЫЕ И ТЕМЫ С ЭФФЕКТОМ ПОЛНОГО ПОГРУЖЕНИЯ ──────────────────────── */
-:root {
+/* ─── ПЕРЕМЕННЫЕ И ТЕМЫ — применяются на :root и на .app-root одновременно ── */
+/* Дефолтная тема (dark) — работает везде включая body и Electron */
+:root,
+.app-root.theme-dark {
   --transition-speed: 0.4s;
+  --bg: #000000;
+  --bg-card: rgba(12, 12, 16, 0.75);
+  --bg-el: rgba(25, 25, 32, 0.6);
+  --border: rgba(255, 255, 255, 0.06);
+  --text: #f8fafc;
+  --muted: #52525b;
+  --accent: #06b6d4;
+  --accent-glow: rgba(6, 182, 212, 0.25);
+  --accent-secondary: #a855f7;
+  --shadow-color: rgba(0, 0, 0, 0.8);
 }
 
-/* 1. Cosmic Drift (Иммерсивная Тёмная) */
-.app-root.theme-dark {
-  --bg: #09090b;
-  --bg-card: rgba(18, 18, 22, 0.45);
-  --bg-el: rgba(39, 39, 44, 0.4);
-  --border: rgba(255, 255, 255, 0.05);
-  --text: #f8fafc;
-  --muted: #71717a;
-  --accent: #06b6d4;
-  --accent-glow: rgba(6, 182, 212, 0.2);
-  --accent-secondary: #a855f7;
-  --shadow-color: rgba(0, 0, 0, 0.6);
+/* Синхронизируем body с текущей темой */
+body {
+  background: var(--bg) !important;
+  color: var(--text) !important;
 }
 
 /* 2. Apple Minimal (Светлая стеклянная) */
 .app-root.theme-light {
   --bg: #f4f4f7;
-  --bg-card: rgba(255, 255, 255, 0.65);
-  --bg-el: rgba(228, 228, 231, 0.6);
-  --border: rgba(0, 0, 0, 0.05);
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-el: rgba(228, 228, 231, 0.7);
+  --border: rgba(0, 0, 0, 0.06);
   --text: #09090b;
   --muted: #71717a;
   --accent: #007aff;
   --accent-glow: rgba(0, 122, 255, 0.15);
   --accent-secondary: #30d158;
-  --shadow-color: rgba(0, 0, 0, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.06);
 }
 
-/* 3. Neo-Tokyo (Киберпанк) */
+/* 3. Neo-Tokyo / Neon (Киберпанк с чёрным фоном) */
 .app-root.theme-cyber {
-  --bg: #0b0616;
-  --bg-card: rgba(22, 11, 46, 0.45);
-  --bg-el: rgba(56, 18, 92, 0.4);
-  --border: rgba(0, 240, 255, 0.12);
+  --bg: #000000;
+  --bg-card: rgba(10, 0, 20, 0.8);
+  --bg-el: rgba(30, 0, 50, 0.5);
+  --border: rgba(255, 0, 127, 0.15);
   --text: #f8fafc;
   --muted: #8c7ea8;
   --accent: #ff007f;
-  --accent-glow: rgba(255, 0, 127, 0.25);
+  --accent-glow: rgba(255, 0, 127, 0.3);
   --accent-secondary: #00f0ff;
-  --shadow-color: rgba(5, 2, 11, 0.7);
+  --shadow-color: rgba(0, 0, 0, 0.9);
 }
 
 /* 4. Forest Zen (Изумрудная) */
 .app-root.theme-emerald {
-  --bg: #050a07;
-  --bg-card: rgba(13, 27, 18, 0.45);
-  --bg-el: rgba(25, 48, 32, 0.4);
+  --bg: #000000;
+  --bg-card: rgba(5, 15, 10, 0.8);
+  --bg-el: rgba(15, 35, 22, 0.5);
   --border: rgba(16, 185, 129, 0.12);
   --text: #f0fdf4;
   --muted: #627d6f;
   --accent: #10b981;
-  --accent-glow: rgba(16, 185, 129, 0.25);
+  --accent-glow: rgba(16, 185, 129, 0.3);
   --accent-secondary: #fbbf24;
-  --shadow-color: rgba(2, 6, 4, 0.7);
+  --shadow-color: rgba(0, 0, 0, 0.9);
 }
 
 /* 5. Arctic Frost (Ледяная Nord) */
 .app-root.theme-nord {
   --bg: #1c212c;
-  --bg-card: rgba(46, 52, 64, 0.45);
-  --bg-el: rgba(67, 76, 94, 0.4);
+  --bg-card: rgba(46, 52, 64, 0.55);
+  --bg-el: rgba(67, 76, 94, 0.45);
   --border: rgba(136, 192, 208, 0.15);
   --text: #eceff4;
   --muted: #9ba4b5;
   --accent: #88c0d0;
   --accent-glow: rgba(136, 192, 208, 0.25);
   --accent-secondary: #81a1c1;
-  --shadow-color: rgba(15, 18, 25, 0.6);
+  --shadow-color: rgba(15, 18, 25, 0.7);
 }
 
 /* ─── СБРОС И ОБЩИЕ СТИЛИ ────────────────────────────────────────────────── */
@@ -97,6 +101,7 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+  min-height: 100vh;
 }
 
 /* Плавный переход для всех основных контейнеров */
@@ -754,6 +759,17 @@ body {
   border-radius: 99px;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+.intensity-pill.locked {
+  cursor: not-allowed;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.intensity-pill.active.locked {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .intensity-pill:hover {
