@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [improve-ui, electron-build]
+    branches: [master, improve-ui, electron-build]
 
 jobs:
   build-mac:
