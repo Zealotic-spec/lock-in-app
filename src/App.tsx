@@ -25,18 +25,22 @@ import {
   Share2, 
   X, 
   ChevronRight,
-  BookMarked
+  BookMarked,
+  BarChart3
 } from "lucide-react";
 // Стили уже импортированы глобально через index.css в main.tsx
 
 // Импорт типов
-import { 
-  Task, 
-  DiaryBlockType, 
-  IdeaItem, 
-  HistoryItem, 
-  Stats 
+import {
+  Task,
+  DiaryBlockType,
+  IdeaItem,
+  HistoryItem,
+  Stats
 } from "./types";
+
+// Модуль "Tracking" — полностью аддитивный, не меняет логику существующих фич
+import TrackingPage from "./tracking/TrackingPage";
 
 const AVAILABLE_TAGS = [
   { name: "DEEP WORK", color: "#ff6a00" },
@@ -408,7 +412,7 @@ export default function App() {
     html.classList.add(`theme-${colorTheme}`);
     // Также применяем CSS переменные напрямую на body для надёжности
     const themes: Record<string, Record<string, string>> = {
-      dark:    { "--bg": "#000000", "--bg-card": "rgba(12,12,16,0.75)", "--bg-el": "rgba(25,25,32,0.6)", "--border": "rgba(255,255,255,0.06)", "--text": "#f8fafc", "--muted": "#52525b", "--accent": "#06b6d4", "--accent-glow": "rgba(6,182,212,0.25)", "--accent-secondary": "#a855f7", "--shadow-color": "rgba(0,0,0,0.8)" },
+      dark:    { "--bg": "#05050b", "--bg-card": "rgba(17,17,27,0.72)", "--bg-el": "rgba(30,30,46,0.55)", "--border": "rgba(255,255,255,0.07)", "--text": "#f8fafc", "--muted": "#71717a", "--accent": "#6366f1", "--accent-glow": "rgba(99,102,241,0.28)", "--accent-secondary": "#a855f7", "--shadow-color": "rgba(0,0,0,0.85)" },
       light:   { "--bg": "#f4f4f7", "--bg-card": "rgba(255,255,255,0.75)", "--bg-el": "rgba(228,228,231,0.7)", "--border": "rgba(0,0,0,0.06)", "--text": "#09090b", "--muted": "#71717a", "--accent": "#007aff", "--accent-glow": "rgba(0,122,255,0.15)", "--accent-secondary": "#30d158", "--shadow-color": "rgba(0,0,0,0.06)" },
       cyber:   { "--bg": "#000000", "--bg-card": "rgba(10,0,20,0.8)", "--bg-el": "rgba(30,0,50,0.5)", "--border": "rgba(255,0,127,0.15)", "--text": "#f8fafc", "--muted": "#8c7ea8", "--accent": "#ff007f", "--accent-glow": "rgba(255,0,127,0.3)", "--accent-secondary": "#00f0ff", "--shadow-color": "rgba(0,0,0,0.9)" },
       emerald: { "--bg": "#000000", "--bg-card": "rgba(5,15,10,0.8)", "--bg-el": "rgba(15,35,22,0.5)", "--border": "rgba(16,185,129,0.12)", "--text": "#f0fdf4", "--muted": "#627d6f", "--accent": "#10b981", "--accent-glow": "rgba(16,185,129,0.3)", "--accent-secondary": "#fbbf24", "--shadow-color": "rgba(0,0,0,0.9)" },
@@ -818,7 +822,7 @@ export default function App() {
   // ГЛАВНЫЙ ЭКРАН ПРИЛОЖЕНИЯ С НОВЫМИ ТЕМАМИ И ПЛАВНЫМИ ТРАНЗИШЕНАМИ
   // ════════════════════════════════════════════════════════════
   return (
-    <div className={`app-root theme-${colorTheme} theme-transition w-full relative overflow-hidden`}>
+    <div className={`app-root theme-${colorTheme} theme-transition w-full relative overflow-hidden ${navCollapsed ? "nav-collapsed" : ""}`}>
       
       {/* Immersive UI Deep Glass Ambient Background Glows */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -826,53 +830,67 @@ export default function App() {
         <div className="absolute top-1/2 -right-48 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[150px]"></div>
       </div>
       
-      {/* ─── FLOATING IN-AIR COLLAPSIBLE NAVBAR (МЯГКО ПАРИТ ПО ЦЕНТРУ СВЕРХУ) ─── */}
-      <nav className={`floating-nav theme-transition ${navCollapsed ? "collapsed" : ""}`}>
-        <button 
-          className="nav-toggle-btn ml-1 hover:text-[var(--accent)]" 
-          title={navCollapsed ? "Развернуть меню" : "Свернуть меню"}
-          onClick={() => setNavCollapsed(!navCollapsed)}
-        >
-          {navCollapsed ? <Maximize2 size={15} /> : <Minimize2 size={15} />}
-        </button>
-
-        <div className="floating-nav-logo">
-          🔒 LOCK<span>IN</span>
+      {/* ─── ЛЕВЫЙ САЙДБАР (СВОРАЧИВАЕМЫЙ, СТЕКЛЯННЫЙ) ─── */}
+      <nav className={`app-sidebar theme-transition ${navCollapsed ? "collapsed" : ""}`}>
+        <div className="sidebar-top">
+          <div className="sidebar-logo">
+            🔒 {!navCollapsed && <>LOCK<span>IN</span></>}
+          </div>
+          <button
+            className="sidebar-toggle-btn hover:text-[var(--accent)]"
+            title={navCollapsed ? "Развернуть меню" : "Свернуть меню"}
+            onClick={() => setNavCollapsed(!navCollapsed)}
+          >
+            {navCollapsed ? <Maximize2 size={15} /> : <Minimize2 size={15} />}
+          </button>
         </div>
 
-        <div className="floating-nav-buttons">
-          <button 
-            className={`nav-pill ${tab === "focus" ? "active" : ""}`}
+        <div className="sidebar-nav">
+          <button
+            className={`sidebar-link ${tab === "focus" ? "active" : ""}`}
+            title="Focus"
             onClick={() => { setTab("focus"); playSound("click"); }}
           >
-            <Timer size={14} /> Focus
+            <Timer size={16} /> {!navCollapsed && "Focus"}
           </button>
-          <button 
-            className={`nav-pill ${tab === "progress" ? "active" : ""}`}
+          <button
+            className={`sidebar-link ${tab === "progress" ? "active" : ""}`}
+            title="Analytics"
             onClick={() => { setTab("progress"); playSound("click"); }}
           >
-            <LayoutDashboard size={14} /> Analytics
+            <LayoutDashboard size={16} /> {!navCollapsed && "Analytics"}
           </button>
-          <button 
-            className={`nav-pill ${tab === "history" ? "active" : ""}`}
+          <button
+            className={`sidebar-link ${tab === "history" ? "active" : ""}`}
+            title="Logs"
             onClick={() => { setTab("history"); playSound("click"); }}
           >
-            <HistoryIcon size={14} /> Logs
+            <HistoryIcon size={16} /> {!navCollapsed && "Logs"}
           </button>
-          <button 
-            className={`nav-pill ${tab === "settings" ? "active" : ""}`}
+          <button
+            className={`sidebar-link ${tab === "tracking" ? "active" : ""}`}
+            title="Tracking"
+            onClick={() => { setTab("tracking"); playSound("click"); }}
+          >
+            <BarChart3 size={16} /> {!navCollapsed && "Tracking"}
+          </button>
+          <button
+            className={`sidebar-link ${tab === "settings" ? "active" : ""}`}
+            title="Settings"
             onClick={() => { setTab("settings"); playSound("click"); }}
           >
-            <SettingsIcon size={14} /> Settings
+            <SettingsIcon size={16} /> {!navCollapsed && "Settings"}
           </button>
         </div>
 
-        <div 
-          className="nav-user" 
+        <div
+          className="sidebar-user"
           onClick={() => { setTab("settings"); playSound("click"); }}
         >
           {activeAvatarRender("w-7 h-7 text-sm")}
-          <span className="nav-user-name theme-transition">{userName || "Без имени"}</span>
+          {!navCollapsed && (
+            <span className="sidebar-user-name theme-transition">{userName || "Без имени"}</span>
+          )}
         </div>
       </nav>
 
@@ -1478,7 +1496,7 @@ export default function App() {
                     
                     <div className="theme-toggle-grid">
                       {[
-                        { id: "dark",     name: "Cosmic",   bg: "#09090b", accent: "#30d158" },
+                        { id: "dark",     name: "Cosmic",   bg: "#05050b", accent: "#6366f1" },
                         { id: "light",    name: "Apple",    bg: "#f5f5f7", accent: "#007aff" },
                         { id: "cyber",    name: "Neon",     bg: "#0d0a1a", accent: "#ff007f" },
                         { id: "emerald",  name: "Zen",      bg: "#0a110d", accent: "#10b981" },
@@ -1513,6 +1531,20 @@ export default function App() {
                     </button>
                   </div>
                 </div>
+              </motion.div>
+            )}
+
+            {/* 📊 TAB: TRACKING (новый модуль — task-менеджер + аналитика + AI Coach) */}
+            {tab === "tracking" && (
+              <motion.div
+                key="tracking"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="w-full"
+              >
+                <TrackingPage colorTheme={colorTheme} />
               </motion.div>
             )}
 

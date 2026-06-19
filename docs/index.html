@@ -10,13 +10,14 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #080810;
-      --surface: rgba(255,255,255,0.04);
-      --border: rgba(255,255,255,0.08);
-      --text: #f0f0f5;
-      --muted: #6b6b80;
+      --bg: #05050b;
+      --surface: rgba(17,17,27,0.55);
+      --border: rgba(255,255,255,0.07);
+      --text: #f8fafc;
+      --muted: #71717a;
       --accent: #6366f1;
-      --accent-glow: rgba(99,102,241,0.25);
+      --accent-secondary: #a855f7;
+      --accent-glow: rgba(99,102,241,0.28);
       --win: #3b82f6;
       --mac: #a855f7;
     }
@@ -237,7 +238,9 @@
       width: 100%;
       border-radius: 20px;
       border: 1px solid var(--border);
-      background: #0d0d1a;
+      background: rgba(17,17,27,0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       overflow: hidden;
       box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
     }
@@ -338,12 +341,15 @@
       border-radius: 20px;
       border: 1px solid var(--border);
       background: var(--surface);
-      transition: border-color 0.2s, transform 0.2s;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
     }
 
     .feature-card:hover {
       border-color: rgba(99,102,241,0.3);
       transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
     }
 
     .feature-icon {
@@ -364,6 +370,123 @@
       line-height: 1.7;
     }
 
+    /* ── TRACKING + AI COACH SHOWCASE ── */
+    .tracking-section {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 100px;
+    }
+
+    .tracking-promo {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 48px;
+      align-items: center;
+      border-radius: 28px;
+      border: 1px solid var(--border);
+      background: linear-gradient(160deg, rgba(99,102,241,0.07), rgba(17,17,27,0.4));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 48px;
+    }
+
+    @media (min-width: 880px) {
+      .tracking-promo { grid-template-columns: 1fr 1fr; }
+    }
+
+    .tracking-copy .section-label { margin-bottom: 16px; }
+
+    .tracking-copy h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(26px, 3.5vw, 36px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .tracking-copy p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .tracking-pill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tracking-pill {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .tracking-pill span.dot-bullet {
+      width: 6px;
+      height: 6px;
+      margin-top: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .tracking-pill b { color: var(--accent); font-weight: 600; }
+
+    /* mock dashboard preview */
+    .tracking-mock {
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(8,8,16,0.6);
+      padding: 24px;
+    }
+
+    .tracking-mock-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .tracking-mock-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 110px;
+      margin-bottom: 20px;
+    }
+
+    .tracking-mock-bar {
+      flex: 1;
+      border-radius: 6px 6px 0 0;
+      background: linear-gradient(180deg, var(--accent), var(--accent-secondary));
+      opacity: 0.85;
+    }
+
+    .tracking-mock-ai {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 16px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .tracking-mock-ai b {
+      display: block;
+      color: var(--text);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
     /* ── CTA ── */
     .cta-section {
       position: relative;
@@ -379,6 +502,8 @@
       border-radius: 28px;
       border: 1px solid rgba(99,102,241,0.2);
       background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.05));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     .cta-box h2 {
@@ -423,6 +548,7 @@
   <div class="nav-logo">🔒 Lock<span>In</span></div>
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
+    <li><a href="#tracking">Tracking</a></li>
     <li><a href="#download">Download</a></li>
   </ul>
 </nav>
@@ -539,6 +665,42 @@
     Или просто используй <a href="https://lock-in-app-gray.vercel.app" style="color:#6366f1;">веб-версию</a> — работает в любом браузере без установки.
   </p>
 </div>
+</section>
+
+<!-- TRACKING + AI COACH -->
+<section class="tracking-section" id="tracking">
+  <div class="tracking-promo">
+    <div class="tracking-copy">
+      <div class="section-label">New module</div>
+      <h3>A dedicated Tracking tab that turns your week into a report.</h3>
+      <p>
+        A standalone task manager, a 7-day productivity dashboard, and an AI Coach
+        that reads your week and tells you what actually happened.
+      </p>
+      <div class="tracking-pill-list">
+        <div class="tracking-pill"><span class="dot-bullet"></span> <span>Lightweight <b>task manager</b> — add, complete, delete, no friction.</span></div>
+        <div class="tracking-pill"><span class="dot-bullet"></span> <span>Responsive <b>weekly charts</b> for focus time, session count, and completed tasks.</span></div>
+        <div class="tracking-pill"><span class="dot-bullet"></span> <span><b>AI Coach</b> (Gemini) analyzes your week, then rolls weeks up into a Monthly Productivity Report.</span></div>
+        <div class="tracking-pill"><span class="dot-bullet"></span> <span>Everything stays in <b>localStorage</b> — export as .json / .txt, or wipe the month in one click.</span></div>
+      </div>
+    </div>
+    <div class="tracking-mock">
+      <div class="tracking-mock-title">Focus minutes · last 7 days</div>
+      <div class="tracking-mock-bars">
+        <div class="tracking-mock-bar" style="height:38%"></div>
+        <div class="tracking-mock-bar" style="height:62%"></div>
+        <div class="tracking-mock-bar" style="height:48%"></div>
+        <div class="tracking-mock-bar" style="height:80%"></div>
+        <div class="tracking-mock-bar" style="height:55%"></div>
+        <div class="tracking-mock-bar" style="height:92%"></div>
+        <div class="tracking-mock-bar" style="height:70%"></div>
+      </div>
+      <div class="tracking-mock-ai">
+        <b>✨ AI Coach — недельный анализ</b>
+        Сильная сторона: стабильный фокус по утрам. Зона роста: вторник выпадает из ритма — попробуй короткую сессию перед обедом.
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- CTA -->

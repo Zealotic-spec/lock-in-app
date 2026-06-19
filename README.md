@@ -23,8 +23,9 @@ Lock In is a desktop productivity app built for people who are serious about dee
 - **Weekly Analytics** — Visualize your focus time across the week
 - **Notion-style Diary** — Capture insights mid-session with slash commands
 - **Idea Storage** — Permanent idea bank that survives sessions
+- **Tracking** — Dedicated task tracker, weekly productivity charts, and an AI Coach that analyzes your weeks and rolls them into a Monthly Productivity Report
 - **AI Coach** — Powered by Gemini, gives personalized productivity insights
-- **5 Themes** — Cosmic (dark), Apple (light), Neon (cyber), Zen (emerald), Arctic (nord)
+- **5 Themes** — Cosmic (dark, indigo/charcoal), Apple (light), Neon (cyber), Zen (emerald), Arctic (nord)
 - **Custom Avatar** — Upload your own photo or pick an emoji
 - **Session History** — Every session logged with depth score and notes
 
@@ -53,17 +54,18 @@ npm run dev
 # Web build
 npm run build
 
-# Desktop (Windows .exe / macOS .dmg)
-npm run dist
+# Desktop (Windows .exe / macOS .dmg / .app), via Tauri v2
+npm run tauri:build
 ```
 
 ## Tech Stack
 
 - **React 19** + TypeScript
 - **Vite** + Tailwind CSS v4
-- **Electron** for desktop
+- **Tauri v2** (Rust) for desktop — lightweight, cross-platform native shell
+- **Recharts** for analytics visualizations
 - **Framer Motion** for animations
-- **Gemini AI** for coaching
+- **Gemini AI** (`@google/genai`) for the AI Coach
 - **GitHub Actions** for macOS builds
 - **Vercel** for web hosting
 
