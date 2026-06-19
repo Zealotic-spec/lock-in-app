@@ -1,78 +1,50 @@
 <div align="center">
 
-# 🔒 LOCK IN
+# 🔒 LOCK IN v2
 
-**The focus tracker that keeps you honest.**
+**The premium focus tracker with local AI analytics.**
 
-Pomodoro timer · Task management · AI coach · Notion-style diary
+Task Management · Weekly AI Coach · Responsive Charts · Notion-style Diary
 
-[Download for Windows](https://github.com/Zealotic-spec/lock-in-app/releases/latest) · [Download for macOS](https://github.com/Zealotic-spec/lock-in-app/releases/latest) · [Open in Browser](https://lock-in-app-gray.vercel.app)
+[Open in Browser](https://lock-in-app-gray.vercel.app)
 
 </div>
 
 ---
 
-## What is Lock In?
+## 🚀 What is Lock In?
 
-Lock In is a desktop productivity app built for people who are serious about deep work. No distractions, no clutter — just a timer, your tasks, and your thoughts.
+**Lock In v2** is a premium, minimalist productivity web application designed for builders, creators, and developers who are serious about deep work. Fully optimized for both desktop and mobile layouts, it combines a tactical task manager with intelligent, local-first analytics powered by Google Gemini.
 
-## Features
+---
 
-- **Pomodoro Timer** — Warm-up, Focus, Deep Work, and Ultramarathon modes
-- **Task Management** — Add tasks, tag them by mode, track daily completion
-- **Weekly Analytics** — Visualize your focus time across the week
-- **Notion-style Diary** — Capture insights mid-session with slash commands
-- **Idea Storage** — Permanent idea bank that survives sessions
-- **Tracking** — Dedicated task tracker, weekly productivity charts, and an AI Coach that analyzes your weeks and rolls them into a Monthly Productivity Report
-- **AI Coach** — Powered by Gemini, gives personalized productivity insights
-- **5 Themes** — Cosmic (dark, indigo/charcoal), Apple (light), Neon (cyber), Zen (emerald), Arctic (nord)
-- **Custom Avatar** — Upload your own photo or pick an emoji
-- **Session History** — Every session logged with depth score and notes
+## ✨ Features (v2)
 
-## Download
+- **⚡ Premium UI/UX** — Modern, clean dark-themed SaaS interface with glassmorphism effects, smooth transitions, and a responsive layout using **Tailwind v4**.
+- **📊 Adaptive Analytics** — Beautiful, screen-adaptive productivity charts (focus distribution, tasks completed) powered by **Recharts / Shadcn UI Charts**.
+- **🤖 Gemini AI Productivity Coach** — Built-in integration with `@google/genai`. It analyzes your weekly performance, pinpoints your focus bottlenecks, and compiles a comprehensive "Monthly Productivity Audit".
+- **🔒 Local-First & Zero Footprint** — 100% of your tracking data, logs, and AI coaching reports are stored securely in your browser's `LocalStorage`. 
+- **💾 Data Portability** — Features single-click actions to "Download Monthly Report (.json)" or "Clear Local Data" to keep your device clutter-free.
+- **📝 Core Workspaces** — Retains your classic Notion-style Session Diary, Idea Storage, and multi-mode Pomodoro configurations.
 
-| Platform | Link |
-|----------|------|
-| Windows | [Lock In Setup.exe](https://github.com/Zealotic-spec/lock-in-app/releases/latest) |
-| macOS | [Lock In.dmg](https://github.com/Zealotic-spec/lock-in-app/releases/latest) |
-| Browser | [lock-in-app-gray.vercel.app](https://lock-in-app-gray.vercel.app) |
+---
 
-> **macOS note:** If you see a security warning, go to System Settings → Privacy & Security → Open Anyway. This is standard for unsigned apps. Alternatively, use the web version.
+## 🛠️ Tech Stack
 
-## Run Locally
+- **Frontend:** React 19 + TypeScript
+- **Bundler:** Vite
+- **Styling:** Tailwind CSS v4 *(CSS-driven architecture)*
+- **Data Visualization:** Recharts (Shadcn UI Charts)
+- **Intelligence:** `@google/genai` (Gemini API Integration)
+- **Hosting:** Vercel
 
+---
+
+## 💻 Run Locally
+
+Follow these steps to set up the web workspace on your local machine:
+
+### 1. Clone the repository
 ```bash
-git clone https://github.com/Zealotic-spec/lock-in-app.git
+git clone [https://github.com/Zealotic-spec/lock-in-app.git](https://github.com/Zealotic-spec/lock-in-app.git)
 cd lock-in-app
-npm install
-npm run dev
-```
-
-## Build
-
-```bash
-# Web build
-npm run build
-
-# Desktop (Windows .exe / macOS .dmg / .app), via Tauri v2
-npm run tauri:build
-```
-
-## Tech Stack
-
-- **React 19** + TypeScript
-- **Vite** + Tailwind CSS v4
-- **Tauri v2** (Rust) for desktop — lightweight, cross-platform native shell
-- **Recharts** for analytics visualizations
-- **Framer Motion** for animations
-- **Gemini AI** (`@google/genai`) for the AI Coach
-- **GitHub Actions** for macOS builds
-- **Vercel** for web hosting
-
----
-
-<div align="center">
-
-Built with too many pomodoros · by [Zealotic](https://github.com/Zealotic-spec)
-
-</div>
