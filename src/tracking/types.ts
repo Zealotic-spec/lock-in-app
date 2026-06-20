@@ -3,12 +3,15 @@
 // напрямую — модуль Tracking держит собственное доменное пространство имён,
 // чтобы не задевать логику существующих фич (таймер/задачи/дневник/история).
 
+// checks[0..6] = ПН..ВС текущей ISO-недели (weekKey). При смене недели чек-лист
+// сбрасывается (см. loadTrackingTasks в storage.ts) — текст задачи сохраняется,
+// это привычка "повторяющаяся задача на неделю", а не одноразовый to-do.
 export interface TrackingTask {
   id: number;
   text: string;
-  completed: boolean;
   createdAt: number;
-  completedAt?: number;
+  weekKey: string;
+  checks: boolean[];
 }
 
 export interface DayMetric {

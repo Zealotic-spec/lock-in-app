@@ -54,6 +54,10 @@ export function getTodayGraphIndex(): number {
   return jsDay === 0 ? 6 : jsDay - 1;
 }
 
+export function getCurrentWeekKey(): string {
+  return getISOWeekKey(new Date());
+}
+
 // Обратная операция: восстанавливает дату четверга ISO-недели по её ключу
 function isoWeekKeyToThursday(weekKey: string): Date {
   const [yearStr, weekStr] = weekKey.split("-W");
@@ -79,8 +83,49 @@ export function getCurrentMonthKey(): string {
 }
 
 // ─── ЗАДАЧИ ТРЕКЕРА (независимый список от "Today's Focus") ────────────────
+// Старый формат (completed: boolean + completedAt?: number) — мигрируется
+// прозрачно в новый (weekKey + checks: boolean[7]) без потери текста/истории.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeTask(raw: any, currentWeekKey: string): TrackingTask {
+  if (Array.isArray(raw?.checks) && typeof raw?.weekKey === "string") {
+    const checks = [...raw.checks];
+    while (checks.length < 7) checks.push(false);
+    return { id: raw.id, text: raw.text, createdAt: raw.createdAt, weekKey: raw.weekKey, checks: checks.slice(0, 7) };
+  }
+  // legacy shape → new shape: один выполненный день восстанавливается по completedAt
+  const checks = Array(7).fill(false);
+  if (raw?.completed && raw?.completedAt) {
+    const jsDay = new Date(raw.completedAt).getDay();
+    checks[jsDay === 0 ? 6 : jsDay - 1] = true;
+  }
+  return {
+    id: raw.id,
+    text: raw.text,
+    createdAt: raw.createdAt ?? Date.now(),
+    weekKey: raw?.completedAt ? getISOWeekKey(new Date(raw.completedAt)) : currentWeekKey,
+    checks,
+  };
+}
+
 export function loadTrackingTasks(): TrackingTask[] {
-  return ls<TrackingTask[]>(KEY_TASKS, []);
+  const currentWeekKey = getCurrentWeekKey();
+  const raw = ls<unknown[]>(KEY_TASKS, []);
+  const tasks = raw.map(t => normalizeTask(t, currentWeekKey));
+
+  // Еженедельный rollover: текст задачи остаётся, чек-лист сбрасывается на новую неделю.
+  let changed = false;
+  const rolled = tasks.map(t => {
+    if (t.weekKey !== currentWeekKey) {
+      changed = true;
+      return { ...t, weekKey: currentWeekKey, checks: Array(7).fill(false) };
+    }
+    return t;
+  });
+
+  if (changed || raw.some((t: any) => !Array.isArray(t?.checks))) {
+    saveTrackingTasks(rolled);
+  }
+  return rolled;
 }
 export function saveTrackingTasks(tasks: TrackingTask[]) {
   lsSet(KEY_TASKS, tasks);
@@ -118,13 +163,15 @@ export function buildWeekMetrics(weekKey: string, tasks: TrackingTask[]): DayMet
     }
   });
 
-  tasks.forEach(t => {
-    if (!t.completed || !t.completedAt) return;
-    if (getISOWeekKey(new Date(t.completedAt)) !== weekKey) return;
-    const jsDay = new Date(t.completedAt).getDay();
-    const idx = jsDay === 0 ? 6 : jsDay - 1;
-    days[idx].tasksCompleted += 1;
-  });
+  // Выполненные задачи трекера: считаем отметку за каждый день недели, в котором
+  // стоит checkbox — независимо от того, когда задача была создана.
+  tasks
+    .filter(t => t.weekKey === weekKey)
+    .forEach(t => {
+      t.checks.forEach((done, idx) => {
+        if (done && idx >= 0 && idx < 7) days[idx].tasksCompleted += 1;
+      });
+    });
 
   return days;
 }

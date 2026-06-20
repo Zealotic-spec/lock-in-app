@@ -35,7 +35,7 @@ export default function TrackingPage({ colorTheme }: TrackingPageProps) {
 
       <div className="tracking-grid">
         <div className="tracking-col">
-          <TaskManager tasks={tasks} onChange={setTasks} />
+          <TaskManager tasks={tasks} weekKey={weekKey} onChange={setTasks} />
           <AICoach weekKey={weekKey} days={days} onCleared={handleCleared} />
         </div>
         <div className="tracking-col">

@@ -141,6 +141,9 @@ export default function AICoach({ weekKey, days, onCleared }: AICoachProps) {
           <Sparkles size={14} /> AI Coach · Gemini
         </span>
       </div>
+      <p className="text-[10px] text-[var(--muted)] -mt-2 mb-1 leading-relaxed">
+        Анализирует данные сразу из Analytics (фокус-сессии таймера) и Tracking (привычки недели).
+      </p>
 
       <div className="ai-coach-panel">
         <div>

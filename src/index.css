@@ -9,7 +9,7 @@
 }
 
 /* ─── ПЕРЕМЕННЫЕ И ТЕМЫ — применяются на :root и на .app-root одновременно ── */
-/* Дефолтная тема (dark) — работает везде включая body и Electron */
+/* Дефолтная тема (dark) — работает везде, включая body и Tauri-окно */
 :root,
 .app-root.theme-dark {
   --transition-speed: 0.4s;
@@ -1747,8 +1747,48 @@ body {
   border-color: var(--accent);
 }
 
-.tracking-task-row {
+/* ─── НЕДЕЛЬНАЯ СЕТКА ЧЕК-БОКСОВ (Tracking → "Привычки недели") ──────────── */
+.tracking-week-table {
   display: flex;
+  flex-direction: column;
+}
+
+.tracking-week-head {
+  display: grid;
+  grid-template-columns: 1fr auto 28px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+.tracking-week-head-spacer {
+  display: block;
+}
+
+.tracking-week-head-checks {
+  display: flex;
+  gap: 6px;
+}
+
+.tracking-week-head-day {
+  width: 26px;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.tracking-week-head-day.today {
+  color: var(--accent);
+}
+
+.tracking-task-row {
+  display: grid;
+  grid-template-columns: 1fr auto 28px;
   align-items: center;
   gap: 10px;
   padding: 10px 4px;
@@ -1759,16 +1799,7 @@ body {
   border-bottom: none;
 }
 
-.tracking-task-row input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--accent);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
 .tracking-task-text {
-  flex: 1;
   font-size: 13px;
   font-weight: 500;
   color: var(--text);
@@ -1780,6 +1811,38 @@ body {
   text-decoration: line-through;
 }
 
+.tracking-task-checks {
+  display: flex;
+  gap: 6px;
+}
+
+.tracking-day-check {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-el);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.tracking-day-check:hover {
+  border-color: var(--accent);
+}
+
+.tracking-day-check.today {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-glow);
+}
+
+.tracking-day-check.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 2px 10px var(--accent-glow);
+}
+
 .tracking-task-del {
   background: transparent;
   border: none;
@@ -1789,6 +1852,7 @@ body {
   border-radius: 6px;
   flex-shrink: 0;
   display: flex;
+  justify-content: center;
   transition: all 0.2s ease;
 }
 
@@ -1923,5 +1987,69 @@ body {
   }
   .timer-display {
     font-size: 56px;
+  }
+  .tracking-title {
+    font-size: 20px;
+  }
+  .tracking-card,
+  .tracking-chart-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+}
+
+/* ─── TRACKING: чек-боксы недели на телефоне ──────────────────────────────
+   Узкие экраны не помещают 7 колонок + текст + delete в одну строку, поэтому
+   строка задачи переразбивается в 2 ряда (текст+del сверху, чек-боксы на всю
+   ширину снизу), а заголовок недели прячется — каждый чек-бокс подписывает
+   себя сам через attr(data-label), без лишнего JS-кода. */
+@media (max-width: 480px) {
+  .tracking-week-head {
+    display: none;
+  }
+
+  .tracking-task-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "text del"
+      "checks checks";
+    row-gap: 10px;
+  }
+
+  .tracking-task-text {
+    grid-area: text;
+  }
+
+  .tracking-task-del {
+    grid-area: del;
+  }
+
+  .tracking-task-checks {
+    grid-area: checks;
+    justify-content: space-between;
+  }
+
+  .tracking-day-check {
+    width: 13%;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tracking-day-check::before {
+    content: attr(data-label);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+
+  .tracking-day-check.today::before {
+    color: var(--accent);
+  }
+
+  .tracking-day-check.checked::before {
+    color: #000000;
   }
 }

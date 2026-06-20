@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Lock-in",
+  "productName": "Lock In",
   "version": "0.1.0",
   "identifier": "com.zealotic.lockin",
   "build": {

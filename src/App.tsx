@@ -404,7 +404,7 @@ export default function App() {
   useEffect(() => { lsSet("lockin_avatar",   userAvatar);  }, [userAvatar]);
   useEffect(() => { lsSet("lockin_custom_avatar", customAvatar); }, [customAvatar]);
 
-  // ── SYNC THEME TO HTML ROOT (чтобы темы работали и в вебе и в Electron) ──
+  // ── SYNC THEME TO HTML ROOT (чтобы темы работали и в вебе, и в Tauri) ──
   useEffect(() => {
     // Убираем все старые классы тем с html элемента
     const html = document.documentElement;
