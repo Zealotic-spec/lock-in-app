@@ -1,0 +1,122 @@
+// Lock-in — Prisma schema
+// Database: PostgreSQL (Supabase). Set DATABASE_URL in server/.env
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+
+  habits     Habit[]
+  habitLogs  HabitLog[]
+  tasks      Task[]
+  goals      Goal[]
+  dailyStats DailyStat[]
+
+  @@map("users")
+}
+
+model Habit {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  color     String    @default("#39FF14")
+  frequency Frequency @default(DAILY)
+  streak    Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  logs HabitLog[]
+
+  @@index([userId])
+  @@map("habits")
+}
+
+model HabitLog {
+  id        String   @id @default(uuid())
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  completed Boolean  @default(true)
+
+  @@unique([habitId, date])
+  @@index([userId, date])
+  @@map("habit_logs")
+}
+
+model Goal {
+  id          String     @id @default(uuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  progress    Int        @default(0)
+  deadline    DateTime?
+  status      GoalStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+
+  tasks Task[]
+
+  @@index([userId])
+  @@map("goals")
+}
+
+model Task {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId    String?
+  goal      Goal?     @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  title     String
+  isDone    Boolean   @default(false)
+  priority  Priority  @default(MEDIUM)
+  dueDate   DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([goalId])
+  @@map("tasks")
+}
+
+model DailyStat {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date       DateTime @db.Date
+  tasksDone  Int      @default(0)
+  habitsDone Int      @default(0)
+  focusMins  Int      @default(0)
+
+  @@unique([userId, date])
+  @@map("daily_stats")
+}
