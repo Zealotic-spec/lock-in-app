@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "@/api/auth";
+import { extractErrorMessage } from "@/lib/errors";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/Button";
 import { Field, Input } from "@/components/ui/Input";
@@ -59,7 +60,7 @@ export default function LoginPage() {
             </Field>
             {mutation.isError && (
               <p className="text-danger text-[13px] mb-3">
-                {(mutation.error as any)?.response?.data?.error || "Invalid email or password."}
+                {extractErrorMessage(mutation.error, "Invalid email or password.")}
               </p>
             )}
             <Button type="submit" className="w-full mt-1" disabled={mutation.isPending}>

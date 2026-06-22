@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import LoginPage from "@/pages/Login";
 import RegisterPage from "@/pages/Register";
@@ -36,63 +37,66 @@ function useStaleChunkRecovery() {
 
 export default function App() {
   useStaleChunkRecovery();
+  const { pathname } = useLocation();
 
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+    <ErrorBoundary key={pathname}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-      <Route
-        element={
-          <ProtectedRoute>
-            <AppShell />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/" element={<DashboardPage />} />
         <Route
-          path="/habits"
           element={
-            <Suspense fallback={<PageFallback />}>
-              <HabitsPage />
-            </Suspense>
+            <ProtectedRoute>
+              <AppShell />
+            </ProtectedRoute>
           }
-        />
-        <Route
-          path="/timer"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <TimerPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/tasks"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <TasksPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/goals"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <GoalsPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/stats"
-          element={
-            <Suspense fallback={<PageFallback />}>
-              <StatsPage />
-            </Suspense>
-          }
-        />
-      </Route>
+        >
+          <Route path="/" element={<DashboardPage />} />
+          <Route
+            path="/habits"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <HabitsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/timer"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <TimerPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/tasks"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <TasksPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/goals"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <GoalsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/stats"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <StatsPage />
+              </Suspense>
+            }
+          />
+        </Route>
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   );
 }
