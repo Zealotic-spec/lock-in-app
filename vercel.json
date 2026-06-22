@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm run build --prefix client",
   "outputDirectory": "client/dist",
-  "installCommand": "npm install --prefix client && npm install --prefix server",
+  "installCommand": "npm install --prefix client && npm install --prefix server && npm run --prefix server prisma:generate",
   "functions": {
     "api/index.ts": {
       "maxDuration": 15
