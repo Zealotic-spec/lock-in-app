@@ -1,7 +1,7 @@
 {
   "buildCommand": "npm --prefix client run build",
   "outputDirectory": "client/dist",
-  "installCommand": "npm install --prefix client && npm install --prefix server",
+  "installCommand": "npm install --include=dev --prefix client && npm install --include=dev --prefix server",
   "functions": {
     "api/index.ts": {
       "maxDuration": 15
