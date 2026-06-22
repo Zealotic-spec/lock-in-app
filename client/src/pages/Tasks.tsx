@@ -37,7 +37,7 @@ function TaskRow({ task, onToggle, onDelete }: { task: Task; onToggle: () => voi
           {new Date(task.dueDate).toLocaleDateString("en", { month: "short", day: "numeric" })}
         </span>
       )}
-      <Flag size={13} className="shrink-0" style={{ color: PRIORITY_COLOR[task.priority] }} title={PRIORITY_LABEL[task.priority]} />
+      <Flag size={13} className="shrink-0" style={{ color: PRIORITY_COLOR[task.priority] }} aria-label={PRIORITY_LABEL[task.priority]} />
       <button
         onClick={onDelete}
         className="opacity-0 group-hover:opacity-100 transition text-muted-2 hover:text-danger shrink-0"
