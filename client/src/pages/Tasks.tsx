@@ -3,6 +3,7 @@ import { Plus, Trash2, Flag } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input, Select } from "@/components/ui/Input";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useGoals } from "@/hooks/useGoals";
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/useTasks";
 import type { Priority, Task } from "@/types";
@@ -55,6 +56,7 @@ export default function TasksPage() {
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const confirmDelete = useConfirm();
 
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
@@ -160,8 +162,14 @@ export default function TasksPage() {
             key={task.id}
             task={task}
             onToggle={() => updateTask.mutate({ id: task.id, input: { isDone: !task.isDone } })}
-            onDelete={() => {
-              if (confirm(`Delete "${task.title}"?`)) deleteTask.mutate(task.id);
+            onDelete={async () => {
+              const ok = await confirmDelete({
+                title: "Delete this task?",
+                message: `"${task.title}" will be removed for good.`,
+                confirmText: "Delete",
+                variant: "danger",
+              });
+              if (ok) deleteTask.mutate(task.id);
             }}
           />
         ))}

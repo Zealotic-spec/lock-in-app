@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Heatmap } from "@/components/ui/Heatmap";
 import { HabitCard } from "@/components/HabitCard";
 import { HabitModal } from "@/components/HabitModal";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useCreateHabit, useDeleteHabit, useHabits, useLogHabit, useUpdateHabit } from "@/hooks/useHabits";
 import { toISODate } from "@/lib/utils";
 import type { Habit } from "@/types";
@@ -15,6 +16,7 @@ export default function HabitsPage() {
   const updateHabit = useUpdateHabit();
   const deleteHabit = useDeleteHabit();
   const logHabit = useLogHabit();
+  const confirmDelete = useConfirm();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Habit | null>(null);
@@ -102,8 +104,14 @@ export default function HabitsPage() {
               setEditing(h);
               setModalOpen(true);
             }}
-            onDelete={() => {
-              if (confirm(`Delete "${h.title}"? This removes all of its logs.`)) deleteHabit.mutate(h.id);
+            onDelete={async () => {
+              const ok = await confirmDelete({
+                title: "Delete this habit?",
+                message: `"${h.title}" and all of its logged history will be removed for good.`,
+                confirmText: "Delete",
+                variant: "danger",
+              });
+              if (ok) deleteHabit.mutate(h.id);
             }}
           />
         ))}

@@ -135,6 +135,15 @@
     background: rgba(57, 255, 20, 0.08);
     box-shadow: var(--shadow-glow);
   }
+  .btn-danger {
+    background: var(--color-danger);
+    color: #fff;
+    box-shadow: 0 0 18px rgba(255, 68, 68, 0.4);
+  }
+  .btn-danger:hover {
+    box-shadow: 0 0 28px rgba(255, 68, 68, 0.6);
+    transform: translateY(-1px);
+  }
 
   /* tag / chip */
   .tag {
@@ -575,6 +584,26 @@
     to {
       transform: none;
       opacity: 1;
+    }
+  }
+
+  /* destructive confirm dialog */
+  .alert-card {
+    border-color: rgba(255, 68, 68, 0.45);
+    box-shadow: 0 0 26px rgba(255, 68, 68, 0.22);
+  }
+  .alert-icon {
+    background: rgba(255, 68, 68, 0.12);
+    border: 1px solid rgba(255, 68, 68, 0.4);
+    animation: alertpulse 1.6s ease-in-out infinite;
+  }
+  @keyframes alertpulse {
+    0%,
+    100% {
+      box-shadow: 0 0 10px rgba(255, 68, 68, 0.2);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
     }
   }
 }

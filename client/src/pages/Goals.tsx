@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { GrowthAreaChart } from "@/components/ui/GrowthAreaChart";
 import { GoalCard } from "@/components/GoalCard";
 import { GoalModal } from "@/components/GoalModal";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useCreateGoal, useDeleteGoal, useGoals, useUpdateGoal } from "@/hooks/useGoals";
 import { useDailyStats } from "@/hooks/useStats";
 import { lastNDays } from "@/lib/utils";
@@ -15,6 +16,7 @@ export default function GoalsPage() {
   const createGoal = useCreateGoal();
   const updateGoal = useUpdateGoal();
   const deleteGoal = useDeleteGoal();
+  const confirmDelete = useConfirm();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Goal | null>(null);
@@ -79,8 +81,14 @@ export default function GoalsPage() {
               setEditing(g);
               setModalOpen(true);
             }}
-            onDelete={() => {
-              if (confirm(`Delete "${g.title}"?`)) deleteGoal.mutate(g.id);
+            onDelete={async () => {
+              const ok = await confirmDelete({
+                title: "Delete this goal?",
+                message: `"${g.title}" will be removed for good.`,
+                confirmText: "Delete",
+                variant: "danger",
+              });
+              if (ok) deleteGoal.mutate(g.id);
             }}
           />
         ))}
