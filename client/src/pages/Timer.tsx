@@ -1,21 +1,14 @@
-import { useEffect, useState } from "react";
 import { Pause, Play, RotateCcw, SkipForward } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Ring } from "@/components/ui/Ring";
 import { Select } from "@/components/ui/Input";
 import { useTasks } from "@/hooks/useTasks";
-import { useHabits, useLogHabit } from "@/hooks/useHabits";
-import { useLogFocusSession } from "@/hooks/useStats";
-import { useTimerSettings, type TimerSettings } from "@/hooks/useTimerSettings";
+import { useHabits } from "@/hooks/useHabits";
+import { useTimerStore, phaseTotal, MIN_MINUTES, MAX_MINUTES } from "@/store/timer";
 import { sounds } from "@/lib/sounds";
-import { toISODate } from "@/lib/utils";
 
-type Mode = "work" | "break";
-
-function formatTime(s: number) {
-  const m = Math.floor(s / 60)
-    .toString()
-    .padStart(2, "0");
+function fmt(s: number) {
+  const m = Math.floor(s / 60).toString().padStart(2, "0");
   const sec = (s % 60).toString().padStart(2, "0");
   return `${m}:${sec}`;
 }
@@ -24,16 +17,12 @@ function DurationField({
   label,
   value,
   presets,
-  min,
-  max,
   onChange,
 }: {
   label: string;
   value: number;
   presets: number[];
-  min: number;
-  max: number;
-  onChange: (mins: number) => void;
+  onChange: (v: number) => void;
 }) {
   return (
     <div className="mb-4 last:mb-0">
@@ -42,8 +31,8 @@ function DurationField({
         <div className="flex items-center gap-1.5">
           <input
             type="number"
-            min={min}
-            max={max}
+            min={MIN_MINUTES}
+            max={MAX_MINUTES}
             value={value}
             onChange={(e) => onChange(Number(e.target.value))}
             className="w-14 bg-[#141414] border border-border rounded-[8px] px-2 py-1 text-[13px] text-white text-center outline-none transition focus:border-accent"
@@ -63,115 +52,73 @@ function DurationField({
   );
 }
 
-function phaseSeconds(mode: Mode, sessionCount: number, settings: TimerSettings) {
-  if (mode === "work") return settings.workMin * 60;
-  return (sessionCount % 4 === 0 ? settings.longBreakMin : settings.shortBreakMin) * 60;
-}
-
 export default function TimerPage() {
   const { data: tasks } = useTasks({ isDone: false });
   const { data: habits } = useHabits();
-  const logFocus = useLogFocusSession();
-  const logHabit = useLogHabit();
-  const { settings, setMinutes, MIN_MINUTES, MAX_MINUTES } = useTimerSettings();
 
-  const [mode, setMode] = useState<Mode>("work");
-  const [sessionCount, setSessionCount] = useState(0);
-  const [secondsLeft, setSecondsLeft] = useState(() => phaseSeconds("work", 0, settings));
-  const [running, setRunning] = useState(false);
-  const [ambient, setAmbient] = useState(false);
-  const [taskId, setTaskId] = useState<string>("");
-  const [habitId, setHabitId] = useState<string>("");
-  const [pulse, setPulse] = useState(false);
+  const mode = useTimerStore((s) => s.mode);
+  const sessionCount = useTimerStore((s) => s.sessionCount);
+  const secondsLeft = useTimerStore((s) => s.secondsLeft);
+  const running = useTimerStore((s) => s.running);
+  const taskId = useTimerStore((s) => s.taskId);
+  const habitId = useTimerStore((s) => s.habitId);
+  const workMin = useTimerStore((s) => s.workMin);
+  const shortBreakMin = useTimerStore((s) => s.shortBreakMin);
+  const longBreakMin = useTimerStore((s) => s.longBreakMin);
 
-  const total = phaseSeconds(mode, sessionCount, settings);
+  const setRunning = useTimerStore((s) => s.setRunning);
+  const setTaskId = useTimerStore((s) => s.setTaskId);
+  const setHabitId = useTimerStore((s) => s.setHabitId);
+  const setMinutes = useTimerStore((s) => s.setMinutes);
+  const resetPhase = useTimerStore((s) => s.resetPhase);
+  const goToBreak = useTimerStore((s) => s.goToBreak);
+  const goToWork = useTimerStore((s) => s.goToWork);
 
-  // tick the clock down one second at a time while running
-  useEffect(() => {
-    if (!running) return;
-    if (secondsLeft <= 0) {
-      advancePhase();
-      return;
-    }
-    const id = setTimeout(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
-    return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running, secondsLeft]);
-
-  // If the user tweaks a duration while paused, reflect it immediately. While
-  // a session is actively running we leave it alone so the countdown doesn't jump.
-  useEffect(() => {
-    if (running) return;
-    setSecondsLeft(phaseSeconds(mode, sessionCount, settings));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.workMin, settings.shortBreakMin, settings.longBreakMin]);
-
-  function advancePhase() {
-    if (mode === "work") {
-      logFocus.mutate(settings.workMin);
-      // Auto-check the linked habit for today if not already done.
-      if (habitId) {
-        const today = toISODate();
-        const habit = habits?.find((h) => h.id === habitId);
-        const alreadyDone = habit?.logs?.some((l) => l.date.slice(0, 10) === today && l.completed);
-        if (!alreadyDone) logHabit.mutate({ id: habitId, date: today, completed: true });
-      }
-      setPulse(true);
-      setTimeout(() => setPulse(false), 1900);
-      sounds.timerEnd();
-      const next = sessionCount + 1;
-      setSessionCount(next);
-      setMode("break");
-      setSecondsLeft(phaseSeconds("break", next, settings));
-    } else {
-      sounds.breakEnd();
-      setMode("work");
-      setSecondsLeft(phaseSeconds("work", sessionCount, settings));
-    }
-  }
-
-  function saveProgressIfAny() {
-    if (mode !== "work") return;
-    const elapsed = settings.workMin * 60 - secondsLeft;
-    if (elapsed >= 60) logFocus.mutate(Math.round(elapsed / 60));
-  }
-
-  function toggleRunning() {
-    if (!running) sounds.timerStart();
-    setRunning((r) => !r);
-  }
-
-  function reset() {
-    saveProgressIfAny();
-    setRunning(false);
-    setMode("work");
-    setSecondsLeft(phaseSeconds("work", sessionCount, settings));
-  }
-
-  function skip() {
-    saveProgressIfAny();
-    advancePhase();
-  }
-
+  const total = phaseTotal(mode, sessionCount, { workMin, shortBreakMin, longBreakMin });
+  const pct = ((total - secondsLeft) / total) * 100;
   const dotsFilled = sessionCount % 4 === 0 && sessionCount > 0 ? 4 : sessionCount % 4;
+
   const currentTask = tasks?.find((t) => t.id === taskId);
   const currentHabit = habits?.find((h) => h.id === habitId);
   const focusLabel = currentTask?.title ?? currentHabit?.title ?? "No focus selected";
-  const pct = ((total - secondsLeft) / total) * 100;
+
+  // ambient: active when running in work mode
+  const ambient = running && mode === "work";
+
+  function toggle() {
+    if (!running) sounds.timerStart();
+    setRunning(!running);
+  }
+
+  function reset() {
+    setRunning(false);
+    resetPhase();
+  }
+
+  function skip() {
+    setRunning(false);
+    if (mode === "work") {
+      sounds.timerEnd();
+      goToBreak(sessionCount + 1);
+    } else {
+      sounds.breakEnd();
+      goToWork();
+    }
+  }
+
+  const modeLabel = mode === "work" ? "Focus session" : sessionCount % 4 === 0 ? "Long break" : "Short break";
 
   return (
     <div className="flex flex-col gap-6 max-w-md mx-auto lg:max-w-none lg:mx-0 lg:flex-row lg:items-start lg:gap-7">
       <Card className="w-full lg:w-[380px] lg:shrink-0 text-center py-8 relative overflow-hidden">
         {ambient && <div className="absolute inset-0 celebrate opacity-60 pointer-events-none" />}
 
-        <p className="eyebrow mb-5 relative z-10">
-          {mode === "work" ? "Focus session" : sessionCount % 4 === 0 ? "Long break" : "Short break"}
-        </p>
+        <p className="eyebrow mb-5 relative z-10">{modeLabel}</p>
 
-        <div className={`mx-auto relative z-10 ${pulse ? "timer-ring-pulse" : ""}`} style={{ width: 248, height: 248 }}>
+        <div className="mx-auto relative z-10" style={{ width: 248, height: 248 }}>
           <Ring pct={pct} size={248} sw={12}>
             <div className="text-center">
-              <div className="timer-time text-[44px]">{formatTime(secondsLeft)}</div>
+              <div className="timer-time text-[44px]">{fmt(secondsLeft)}</div>
               <p className="text-muted text-[12px] mt-1 max-w-[160px] truncate mx-auto">
                 {mode === "work" ? focusLabel : "Step away & stretch"}
               </p>
@@ -189,7 +136,7 @@ export default function TimerPage() {
           <button className="btn-circle-sm" onClick={reset} aria-label="Reset">
             <RotateCcw size={18} />
           </button>
-          <button className="btn-round" onClick={toggleRunning} aria-label={running ? "Pause" : "Start"}>
+          <button className="btn-round" onClick={toggle} aria-label={running ? "Pause" : "Start"}>
             {running ? <Pause size={26} fill="#000" /> : <Play size={26} fill="#000" />}
           </button>
           <button className="btn-circle-sm" onClick={skip} aria-label="Skip">
@@ -204,9 +151,7 @@ export default function TimerPage() {
           <Select value={taskId} onChange={(e) => { setTaskId(e.target.value); if (e.target.value) setHabitId(""); }}>
             <option value="">No task</option>
             {tasks?.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.title}
-              </option>
+              <option key={t.id} value={t.id}>{t.title}</option>
             ))}
           </Select>
         </Card>
@@ -216,9 +161,7 @@ export default function TimerPage() {
           <Select value={habitId} onChange={(e) => { setHabitId(e.target.value); if (e.target.value) setTaskId(""); }}>
             <option value="">No habit</option>
             {habits?.map((h) => (
-              <option key={h.id} value={h.id}>
-                {h.title} · {h.streak}🔥
-              </option>
+              <option key={h.id} value={h.id}>{h.title} · {h.streak}🔥</option>
             ))}
           </Select>
           {currentHabit && (
@@ -232,44 +175,23 @@ export default function TimerPage() {
           <p className="eyebrow mb-3">Session length</p>
           <DurationField
             label="Focus"
-            value={settings.workMin}
+            value={workMin}
             presets={[15, 25, 45, 60]}
-            min={MIN_MINUTES}
-            max={MAX_MINUTES}
             onChange={(v) => setMinutes("workMin", v)}
           />
           <DurationField
             label="Short break"
-            value={settings.shortBreakMin}
+            value={shortBreakMin}
             presets={[5, 10, 15]}
-            min={MIN_MINUTES}
-            max={MAX_MINUTES}
             onChange={(v) => setMinutes("shortBreakMin", v)}
           />
           <DurationField
             label="Long break"
-            value={settings.longBreakMin}
+            value={longBreakMin}
             presets={[15, 20, 30]}
-            min={MIN_MINUTES}
-            max={MAX_MINUTES}
             onChange={(v) => setMinutes("longBreakMin", v)}
           />
           {running && <p className="text-[11px] text-muted-2 mt-1">Changes apply once the current session pauses or ends.</p>}
-        </Card>
-
-        <Card className="w-full flex items-center justify-between">
-          <div>
-            <p className="text-[14px] font-medium">Ambient mode</p>
-            <p className="text-[12px] text-muted-2">Dim the screen for deep focus</p>
-          </div>
-          <button
-            className={`switch ${ambient ? "switch-on" : ""}`}
-            onClick={() => setAmbient((v) => !v)}
-            aria-pressed={ambient}
-            aria-label="Toggle ambient mode"
-          >
-            <i />
-          </button>
         </Card>
       </div>
     </div>

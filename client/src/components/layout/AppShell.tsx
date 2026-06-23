@@ -4,10 +4,15 @@ import { BottomNav } from "./BottomNav";
 import { NAV } from "@/lib/nav";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { FloatingTimer } from "@/components/FloatingTimer";
+import { useTimerEngine } from "@/hooks/useTimerEngine";
 
 export function AppShell() {
   const { pathname } = useLocation();
   const current = NAV.find((n) => (n.to === "/" ? pathname === "/" : pathname.startsWith(n.to)));
+
+  // Drives the countdown from here so the timer keeps running on every page.
+  useTimerEngine();
 
   return (
     <div className="flex min-h-screen bg-bg">
@@ -18,8 +23,6 @@ export function AppShell() {
           <h1 className="screen-title text-[26px] md:text-[30px]">{current?.title ?? "Dashboard"}</h1>
         </header>
         <main className="flex-1 px-5 pb-28 md:px-9 md:pb-10 fade-in">
-          {/* key=pathname resets the boundary on every navigation so an error on
-              one tab doesn't keep the next tab stuck on the error screen */}
           <ErrorBoundary key={pathname}>
             <Outlet />
           </ErrorBoundary>
@@ -27,6 +30,7 @@ export function AppShell() {
       </div>
       <BottomNav />
       <InstallPrompt />
+      <FloatingTimer />
     </div>
   );
 }
