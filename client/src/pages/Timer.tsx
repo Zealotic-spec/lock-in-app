@@ -4,9 +4,11 @@ import { Card } from "@/components/ui/Card";
 import { Ring } from "@/components/ui/Ring";
 import { Select } from "@/components/ui/Input";
 import { useTasks } from "@/hooks/useTasks";
+import { useHabits, useLogHabit } from "@/hooks/useHabits";
 import { useLogFocusSession } from "@/hooks/useStats";
 import { useTimerSettings, type TimerSettings } from "@/hooks/useTimerSettings";
 import { sounds } from "@/lib/sounds";
+import { toISODate } from "@/lib/utils";
 
 type Mode = "work" | "break";
 
@@ -68,7 +70,9 @@ function phaseSeconds(mode: Mode, sessionCount: number, settings: TimerSettings)
 
 export default function TimerPage() {
   const { data: tasks } = useTasks({ isDone: false });
+  const { data: habits } = useHabits();
   const logFocus = useLogFocusSession();
+  const logHabit = useLogHabit();
   const { settings, setMinutes, MIN_MINUTES, MAX_MINUTES } = useTimerSettings();
 
   const [mode, setMode] = useState<Mode>("work");
@@ -77,6 +81,7 @@ export default function TimerPage() {
   const [running, setRunning] = useState(false);
   const [ambient, setAmbient] = useState(false);
   const [taskId, setTaskId] = useState<string>("");
+  const [habitId, setHabitId] = useState<string>("");
   const [pulse, setPulse] = useState(false);
 
   const total = phaseSeconds(mode, sessionCount, settings);
@@ -104,6 +109,13 @@ export default function TimerPage() {
   function advancePhase() {
     if (mode === "work") {
       logFocus.mutate(settings.workMin);
+      // Auto-check the linked habit for today if not already done.
+      if (habitId) {
+        const today = toISODate();
+        const habit = habits?.find((h) => h.id === habitId);
+        const alreadyDone = habit?.logs?.some((l) => l.date.slice(0, 10) === today && l.completed);
+        if (!alreadyDone) logHabit.mutate({ id: habitId, date: today, completed: true });
+      }
       setPulse(true);
       setTimeout(() => setPulse(false), 1900);
       sounds.timerEnd();
@@ -143,6 +155,8 @@ export default function TimerPage() {
 
   const dotsFilled = sessionCount % 4 === 0 && sessionCount > 0 ? 4 : sessionCount % 4;
   const currentTask = tasks?.find((t) => t.id === taskId);
+  const currentHabit = habits?.find((h) => h.id === habitId);
+  const focusLabel = currentTask?.title ?? currentHabit?.title ?? "No focus selected";
   const pct = ((total - secondsLeft) / total) * 100;
 
   return (
@@ -159,7 +173,7 @@ export default function TimerPage() {
             <div className="text-center">
               <div className="timer-time text-[44px]">{formatTime(secondsLeft)}</div>
               <p className="text-muted text-[12px] mt-1 max-w-[160px] truncate mx-auto">
-                {mode === "work" ? currentTask?.title ?? "No task selected" : "Step away & stretch"}
+                {mode === "work" ? focusLabel : "Step away & stretch"}
               </p>
             </div>
           </Ring>
@@ -186,15 +200,32 @@ export default function TimerPage() {
 
       <div className="flex flex-col gap-6 w-full lg:flex-1">
         <Card className="w-full">
-          <p className="eyebrow mb-2">Current task</p>
-          <Select value={taskId} onChange={(e) => setTaskId(e.target.value)}>
-            <option value="">No task — just focus</option>
+          <p className="eyebrow mb-2">Focus on task</p>
+          <Select value={taskId} onChange={(e) => { setTaskId(e.target.value); if (e.target.value) setHabitId(""); }}>
+            <option value="">No task</option>
             {tasks?.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.title}
               </option>
             ))}
           </Select>
+        </Card>
+
+        <Card className="w-full">
+          <p className="eyebrow mb-2">Focus on habit</p>
+          <Select value={habitId} onChange={(e) => { setHabitId(e.target.value); if (e.target.value) setTaskId(""); }}>
+            <option value="">No habit</option>
+            {habits?.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.title} · {h.streak}🔥
+              </option>
+            ))}
+          </Select>
+          {currentHabit && (
+            <p className="text-[11.5px] text-muted-2 mt-2">
+              Session end will auto-check <span className="text-accent">{currentHabit.title}</span> for today.
+            </p>
+          )}
         </Card>
 
         <Card className="w-full">
