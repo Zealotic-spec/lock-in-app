@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { Check } from "lucide-react";
+import { sounds } from "@/lib/sounds";
 
 const BURST_OFFSETS = [
   [-18, -10],
@@ -27,6 +28,9 @@ export function HabitCheckRow({
     if (!done) {
       setBursting(true);
       setTimeout(() => setBursting(false), 600);
+      sounds.habitCheck();
+    } else {
+      sounds.habitUncheck();
     }
     onToggle();
   }

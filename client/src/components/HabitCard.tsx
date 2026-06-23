@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { Ring } from "@/components/ui/Ring";
 import type { Habit } from "@/types";
 import { toISODate } from "@/lib/utils";
+import { sounds } from "@/lib/sounds";
 
 export function HabitCard({
   habit,
@@ -65,7 +66,10 @@ export function HabitCard({
         </p>
       </div>
 
-      <button className={`checkin ${doneToday ? "checkin-done" : ""}`} onClick={onCheckin}>
+      <button
+        className={`checkin ${doneToday ? "checkin-done" : ""}`}
+        onClick={() => { doneToday ? sounds.habitUncheck() : sounds.habitCheck(); onCheckin(); }}
+      >
         {doneToday ? "Checked in" : "Check in"}
       </button>
     </Card>

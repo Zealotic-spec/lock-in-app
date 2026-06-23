@@ -50,12 +50,15 @@ export async function summary(req: Request, res: Response) {
   const weekAgo = addDays(now, -7);
   const monthAgo = addDays(now, -30);
 
-  const [habits, tasksDoneCount, allStats, weekStats, monthStats] = await Promise.all([
+  const thirtyDaysAgo = startOfDay(addDays(now, -30));
+
+  const [habits, tasksDoneCount, allStats, weekStats, monthStats, completedLogsCount] = await Promise.all([
     prisma.habit.findMany({ where: { userId } }),
     prisma.task.count({ where: { userId, isDone: true } }),
     prisma.dailyStat.findMany({ where: { userId }, orderBy: { date: "asc" } }),
     prisma.dailyStat.findMany({ where: { userId, date: { gte: startOfDay(weekAgo) } } }),
     prisma.dailyStat.findMany({ where: { userId, date: { gte: startOfDay(monthAgo) } } }),
+    prisma.habitLog.count({ where: { userId, completed: true, date: { gte: thirtyDaysAgo } } }),
   ]);
 
   const totalFocusMins = allStats.reduce((s, d) => s + d.focusMins, 0);
@@ -76,9 +79,17 @@ export async function summary(req: Request, res: Response) {
   const dowLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const bestDayIdx = dowAvg.reduce((mi, v, i, a) => (v > a[mi] ? i : mi), 0);
 
-  const totalHabitDays = habits.length * allStats.length;
-  const completedHabitDays = sum(allStats, "habitsDone");
-  const completionRate = totalHabitDays > 0 ? Math.round((completedHabitDays / totalHabitDays) * 100) : 0;
+  // Completion rate: actual completed logs / possible check-ins in last 30 days,
+  // accounting for when each habit was created (don't count days before it existed).
+  const possibleCheckIns = habits.reduce((acc, h) => {
+    const created = startOfDay(new Date(h.createdAt));
+    const start = created > thirtyDaysAgo ? created : thirtyDaysAgo;
+    const days = Math.max(0, Math.round((now.getTime() - start.getTime()) / 86_400_000));
+    return acc + (h.frequency === "DAILY" ? days : Math.ceil(days / 7));
+  }, 0);
+  const completionRate = possibleCheckIns > 0
+    ? Math.min(100, Math.round((completedLogsCount / possibleCheckIns) * 100))
+    : 0;
 
   res.json({
     totals: {

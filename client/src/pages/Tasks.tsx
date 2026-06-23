@@ -6,6 +6,7 @@ import { Input, Select } from "@/components/ui/Input";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useGoals } from "@/hooks/useGoals";
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from "@/hooks/useTasks";
+import { sounds } from "@/lib/sounds";
 import type { Priority, Task } from "@/types";
 
 const PRIORITY_COLOR: Record<Priority, string> = {
@@ -67,6 +68,7 @@ export default function TasksPage() {
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) return;
+    sounds.add();
     createTask.mutate(
       {
         title: title.trim(),
@@ -161,7 +163,10 @@ export default function TasksPage() {
           <TaskRow
             key={task.id}
             task={task}
-            onToggle={() => updateTask.mutate({ id: task.id, input: { isDone: !task.isDone } })}
+            onToggle={() => {
+              task.isDone ? sounds.taskUndone() : sounds.taskDone();
+              updateTask.mutate({ id: task.id, input: { isDone: !task.isDone } });
+            }}
             onDelete={async () => {
               const ok = await confirmDelete({
                 title: "Delete this task?",
@@ -169,7 +174,7 @@ export default function TasksPage() {
                 confirmText: "Delete",
                 variant: "danger",
               });
-              if (ok) deleteTask.mutate(task.id);
+              if (ok) { sounds.del(); deleteTask.mutate(task.id); }
             }}
           />
         ))}

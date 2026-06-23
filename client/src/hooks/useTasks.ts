@@ -26,7 +26,22 @@ export function useUpdateTask() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: Partial<Pick<Task, "title" | "isDone" | "priority" | "dueDate" | "goalId">> }) =>
       tasksApi.updateTask(id, input),
-    onSuccess: () => {
+
+    // Instantly update task state across all query variants.
+    onMutate: async ({ id, input }) => {
+      await qc.cancelQueries({ queryKey: ["tasks"] });
+      const snapshots = qc.getQueriesData<Task[]>({ queryKey: ["tasks"] });
+      qc.setQueriesData<Task[]>({ queryKey: ["tasks"] }, (old) =>
+        old?.map((t) => (t.id === id ? { ...t, ...input } : t))
+      );
+      return { snapshots };
+    },
+
+    onError: (_err, _vars, ctx) => {
+      ctx?.snapshots.forEach(([key, data]) => qc.setQueryData(key, data));
+    },
+
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
       qc.invalidateQueries({ queryKey: ["goals"] });
       qc.invalidateQueries({ queryKey: ["stats-summary"] });

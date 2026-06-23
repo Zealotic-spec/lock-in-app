@@ -60,29 +60,13 @@ export async function logHabit(req: Request, res: Response) {
   const { date, completed = true } = logSchema.parse(req.body);
   const day = new Date(date);
 
-  const existing = await prisma.habitLog.findUnique({
-    where: { habitId_date: { habitId: habit.id, date: day } },
-  });
-
-  const log = await prisma.habitLog.upsert({
-    where: { habitId_date: { habitId: habit.id, date: day } },
-    update: { completed },
-    create: { habitId: habit.id, userId: req.userId!, date: day, completed },
-  });
-
-  // Keep today's DailyStat.habitsDone in sync (only bump for today's date).
-  const isToday = startOfDay(day).getTime() === startOfDay(new Date()).getTime();
-  if (isToday) {
-    const wasCompleted = existing?.completed ?? false;
-    const delta = completed && !wasCompleted ? 1 : !completed && wasCompleted ? -1 : 0;
-    if (delta !== 0) {
-      await prisma.dailyStat.upsert({
-        where: { userId_date: { userId: req.userId!, date: startOfDay(new Date()) } },
-        update: { habitsDone: { increment: delta } },
-        create: { userId: req.userId!, date: startOfDay(new Date()), habitsDone: Math.max(0, delta), tasksDone: 0, focusMins: 0 },
-      });
-    }
-  }
+  const [log] = await Promise.all([
+    prisma.habitLog.upsert({
+      where: { habitId_date: { habitId: habit.id, date: day } },
+      update: { completed },
+      create: { habitId: habit.id, userId: req.userId!, date: day, completed },
+    }),
+  ]);
 
   const streak = await computeStreak(habit.id);
   await prisma.habit.update({ where: { id: habit.id }, data: { streak } });

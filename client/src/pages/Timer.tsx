@@ -6,6 +6,7 @@ import { Select } from "@/components/ui/Input";
 import { useTasks } from "@/hooks/useTasks";
 import { useLogFocusSession } from "@/hooks/useStats";
 import { useTimerSettings, type TimerSettings } from "@/hooks/useTimerSettings";
+import { sounds } from "@/lib/sounds";
 
 type Mode = "work" | "break";
 
@@ -105,11 +106,13 @@ export default function TimerPage() {
       logFocus.mutate(settings.workMin);
       setPulse(true);
       setTimeout(() => setPulse(false), 1900);
+      sounds.timerEnd();
       const next = sessionCount + 1;
       setSessionCount(next);
       setMode("break");
       setSecondsLeft(phaseSeconds("break", next, settings));
     } else {
+      sounds.breakEnd();
       setMode("work");
       setSecondsLeft(phaseSeconds("work", sessionCount, settings));
     }
@@ -122,6 +125,7 @@ export default function TimerPage() {
   }
 
   function toggleRunning() {
+    if (!running) sounds.timerStart();
     setRunning((r) => !r);
   }
 

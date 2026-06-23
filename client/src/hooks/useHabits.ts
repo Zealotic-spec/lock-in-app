@@ -43,7 +43,32 @@ export function useLogHabit() {
   return useMutation({
     mutationFn: ({ id, date, completed }: { id: string; date: string; completed: boolean }) =>
       habitsApi.logHabit(id, date, completed),
-    onSuccess: () => {
+
+    // Instantly flip the checkbox — no waiting for the server.
+    onMutate: async ({ id, date, completed }) => {
+      await qc.cancelQueries({ queryKey: ["habits"] });
+      const prev = qc.getQueryData<Habit[]>(["habits"]);
+
+      qc.setQueryData<Habit[]>(["habits"], (old) =>
+        old?.map((h) => {
+          if (h.id !== id) return h;
+          const logs = h.logs ?? [];
+          const exists = logs.some((l) => l.date.slice(0, 10) === date);
+          const newLogs = exists
+            ? logs.map((l) => (l.date.slice(0, 10) === date ? { ...l, completed } : l))
+            : [...logs, { id: `opt-${Date.now()}`, habitId: id, userId: h.userId, date, completed }];
+          return { ...h, logs: newLogs };
+        })
+      );
+
+      return { prev };
+    },
+
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["habits"], ctx.prev);
+    },
+
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["habits"] });
       qc.invalidateQueries({ queryKey: ["habit-logs"] });
       qc.invalidateQueries({ queryKey: ["stats-summary"] });
