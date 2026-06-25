@@ -96,7 +96,6 @@ export default function TimerPage() {
   }
 
   function skip() {
-    setRunning(false);
     if (mode === "work") {
       sounds.timerEnd();
       goToBreak(sessionCount + 1);

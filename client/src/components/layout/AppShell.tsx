@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
@@ -6,6 +7,7 @@ import { InstallPrompt } from "@/components/InstallPrompt";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { FloatingTimer } from "@/components/FloatingTimer";
 import { useTimerEngine } from "@/hooks/useTimerEngine";
+import { requestNotifyPermission } from "@/lib/notify";
 
 export function AppShell() {
   const { pathname } = useLocation();
@@ -13,6 +15,9 @@ export function AppShell() {
 
   // Drives the countdown from here so the timer keeps running on every page.
   useTimerEngine();
+
+  // Ask for notification permission once on load (browser shows a prompt).
+  useEffect(() => { requestNotifyPermission(); }, []);
 
   return (
     <div className="flex min-h-screen bg-bg">

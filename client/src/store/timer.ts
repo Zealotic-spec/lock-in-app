@@ -12,7 +12,11 @@ export function clampMin(v: number, fallback: number) {
   return Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, Math.round(v)));
 }
 
-export function phaseTotal(mode: TimerMode, sessionCount: number, s: { workMin: number; shortBreakMin: number; longBreakMin: number }) {
+export function phaseTotal(
+  mode: TimerMode,
+  sessionCount: number,
+  s: { workMin: number; shortBreakMin: number; longBreakMin: number }
+) {
   if (mode === "work") return s.workMin * 60;
   return (sessionCount % 4 === 0 ? s.longBreakMin : s.shortBreakMin) * 60;
 }
@@ -20,16 +24,20 @@ export function phaseTotal(mode: TimerMode, sessionCount: number, s: { workMin: 
 interface TimerState {
   mode: TimerMode;
   sessionCount: number;
+  /** Remaining seconds — kept in sync by the engine every 200ms when running. */
   secondsLeft: number;
   running: boolean;
+  /** Timestamp (ms) when the current run started. Used to compute real elapsed
+   *  time so background throttling doesn't desync the clock. */
+  startedAt: number | null;
   taskId: string;
   habitId: string;
   workMin: number;
   shortBreakMin: number;
   longBreakMin: number;
 
-  tick: () => void;
   setRunning: (v: boolean) => void;
+  setSecondsLeft: (v: number) => void;
   setTaskId: (id: string) => void;
   setHabitId: (id: string) => void;
   setMinutes: (key: "workMin" | "shortBreakMin" | "longBreakMin", value: number) => void;
@@ -45,13 +53,28 @@ export const useTimerStore = create<TimerState>()(
       sessionCount: 0,
       secondsLeft: TIMER_DEFAULTS.workMin * 60,
       running: false,
+      startedAt: null,
       taskId: "",
       habitId: "",
       ...TIMER_DEFAULTS,
 
-      tick: () => set((s) => ({ secondsLeft: Math.max(0, s.secondsLeft - 1) })),
+      setRunning: (v) => {
+        if (v) {
+          // Record the exact moment we (re)started so the engine can compute
+          // elapsed time correctly even after Chrome throttles the tab.
+          set({ running: true, startedAt: Date.now() });
+        } else {
+          // Snapshot the real remaining time before pausing.
+          const s = get();
+          const elapsed = s.startedAt
+            ? Math.floor((Date.now() - s.startedAt) / 1000)
+            : 0;
+          const remaining = Math.max(0, s.secondsLeft - elapsed);
+          set({ running: false, startedAt: null, secondsLeft: remaining });
+        }
+      },
 
-      setRunning: (v) => set({ running: v }),
+      setSecondsLeft: (v) => set({ secondsLeft: v }),
 
       setTaskId: (id) => set({ taskId: id }),
       setHabitId: (id) => set({ habitId: id }),
@@ -60,7 +83,6 @@ export const useTimerStore = create<TimerState>()(
         const s = get();
         const clamped = clampMin(value, s[key]);
         set({ [key]: clamped });
-        // If paused, sync secondsLeft to the new duration
         if (!s.running) {
           set({ secondsLeft: phaseTotal(s.mode, s.sessionCount, { ...s, [key]: clamped }) });
         }
@@ -68,22 +90,26 @@ export const useTimerStore = create<TimerState>()(
 
       resetPhase: () => {
         const s = get();
-        set({ running: false, mode: "work", secondsLeft: s.workMin * 60 });
+        set({ running: false, startedAt: null, mode: "work", sessionCount: 0, secondsLeft: s.workMin * 60 });
       },
 
       goToBreak: (nextCount) => {
         const s = get();
-        set({ mode: "break", sessionCount: nextCount, secondsLeft: phaseTotal("break", nextCount, s) });
+        set({
+          mode: "break",
+          sessionCount: nextCount,
+          secondsLeft: phaseTotal("break", nextCount, s),
+          startedAt: Date.now(), // keep running
+        });
       },
 
       goToWork: () => {
         const s = get();
-        set({ mode: "work", secondsLeft: s.workMin * 60 });
+        set({ mode: "work", secondsLeft: s.workMin * 60, startedAt: Date.now() });
       },
     }),
     {
       name: "lockin-timer",
-      // Don't persist running — timer should be paused on page reload
       partialize: (s) => ({
         mode: s.mode,
         sessionCount: s.sessionCount,
@@ -93,6 +119,9 @@ export const useTimerStore = create<TimerState>()(
         workMin: s.workMin,
         shortBreakMin: s.shortBreakMin,
         longBreakMin: s.longBreakMin,
+        // Persist startedAt so a hard-refresh mid-session still shows correct time
+        startedAt: s.startedAt,
+        running: s.running,
       }),
     }
   )
