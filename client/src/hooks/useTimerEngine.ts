@@ -39,7 +39,8 @@ export function useTimerEngine() {
       const s = useTimerStore.getState();
       if (!s.running || s.startedAt === null) return s.secondsLeft;
       const elapsed = Math.floor((Date.now() - s.startedAt) / 1000);
-      return Math.max(0, s.secondsLeft - elapsed);
+      const base = s.secondsLeftAtStart ?? s.secondsLeft;
+      return Math.max(0, base - elapsed);
     }
 
     function advancePhase() {
