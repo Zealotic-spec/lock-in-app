@@ -58,18 +58,26 @@ export async function deleteHabit(req: Request, res: Response) {
 export async function logHabit(req: Request, res: Response) {
   const habit = await ownedHabit(req.params.id, req.userId!);
   const { date, completed = true } = logSchema.parse(req.body);
-  const day = new Date(date);
+  const day = startOfDay(new Date(date));
 
-  const [log] = await Promise.all([
-    prisma.habitLog.upsert({
-      where: { habitId_date: { habitId: habit.id, date: day } },
-      update: { completed },
-      create: { habitId: habit.id, userId: req.userId!, date: day, completed },
-    }),
-  ]);
+  const log = await prisma.habitLog.upsert({
+    where: { habitId_date: { habitId: habit.id, date: day } },
+    update: { completed },
+    create: { habitId: habit.id, userId: req.userId!, date: day, completed },
+  });
 
   const streak = await computeStreak(habit.id);
   await prisma.habit.update({ where: { id: habit.id }, data: { streak } });
+
+  // Sync DailyStat.habitsDone: count how many unique habits are completed on this date.
+  const habitsDone = await prisma.habitLog.count({
+    where: { userId: req.userId!, date: day, completed: true },
+  });
+  await prisma.dailyStat.upsert({
+    where: { userId_date: { userId: req.userId!, date: day } },
+    update: { habitsDone },
+    create: { userId: req.userId!, date: day, habitsDone, tasksDone: 0, focusMins: 0 },
+  });
 
   res.json({ log, streak });
 }

@@ -72,6 +72,7 @@ export function useLogHabit() {
       qc.invalidateQueries({ queryKey: ["habits"] });
       qc.invalidateQueries({ queryKey: ["habit-logs"] });
       qc.invalidateQueries({ queryKey: ["stats-summary"] });
+      qc.invalidateQueries({ queryKey: ["daily-stats"] });
     },
   });
 }
