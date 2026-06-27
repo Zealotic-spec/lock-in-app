@@ -38,35 +38,37 @@ export function Heatmap({ countByDate, weeks = 26 }: { countByDate: Record<strin
   }
 
   return (
-    <div>
-      {/* Month labels — left-padded to skip the 12px day-label col + 4px gap */}
-      <div className="heat-months" style={{ paddingLeft: 16 }}>
-        {monthLabels.map((label, i) => (
-          <div key={i}>{label}</div>
-        ))}
-      </div>
+    <div className="overflow-x-auto -mx-1 px-1 pb-1">
+      <div style={{ minWidth: `${numCols * 15 + 28}px` }}>
+        {/* Month labels — left-padded to skip the 12px day-label col + 4px gap */}
+        <div className="heat-months" style={{ paddingLeft: 16 }}>
+          {monthLabels.map((label, i) => (
+            <div key={i}>{label}</div>
+          ))}
+        </div>
 
-      {/* Grid: col 0 = day labels (12px), cols 1..N = data (1fr each) */}
-      <div className="heat">
-        {DAY_LABELS.map((d, i) => (
-          <span key={`dl-${i}`}>{d}</span>
-        ))}
-        {padded.map((day, i) =>
-          day === null ? (
-            <i key={`pad-${i}`} style={{ visibility: "hidden" }} />
-          ) : (
-            <i
-              key={day}
-              data-l={levelFor(countByDate[day] || 0)}
-              data-today={day === todayStr ? "" : undefined}
-              title={`${new Date(day + "T00:00:00").toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })} — ${countByDate[day] || 0} habits`}
-            />
-          ),
-        )}
+        {/* Grid: col 0 = day labels (12px), cols 1..N = data (1fr each) */}
+        <div className="heat">
+          {DAY_LABELS.map((d, i) => (
+            <span key={`dl-${i}`}>{d}</span>
+          ))}
+          {padded.map((day, i) =>
+            day === null ? (
+              <i key={`pad-${i}`} style={{ visibility: "hidden" }} />
+            ) : (
+              <i
+                key={day}
+                data-l={levelFor(countByDate[day] || 0)}
+                data-today={day === todayStr ? "" : undefined}
+                title={`${new Date(day + "T00:00:00").toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })} — ${countByDate[day] || 0} habits`}
+              />
+            ),
+          )}
+        </div>
       </div>
     </div>
   );
