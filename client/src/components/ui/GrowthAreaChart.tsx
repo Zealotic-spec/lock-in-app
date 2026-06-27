@@ -1,22 +1,55 @@
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface Point {
   label: string;
   v: number;
 }
 
-export function GrowthAreaChart({ data, height = 180 }: { data: Point[]; height?: number }) {
+interface Props {
+  data: Point[];
+  height?: number;
+  color?: string;
+  name?: string;
+  unit?: string;
+  showXAxis?: boolean;
+}
+
+export function GrowthAreaChart({
+  data,
+  height = 180,
+  color = "#39FF14",
+  name = "Value",
+  unit = "",
+  showXAxis = false,
+}: Props) {
+  const gradientId = `gf-${color.replace(/[^a-z0-9]/gi, "")}`;
+  const glowColor = `${color}80`;
+
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
+        <AreaChart data={data} margin={{ top: 6, right: 4, bottom: 0, left: -28 }}>
           <defs>
-            <linearGradient id="growthFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#39FF14" stopOpacity={0.32} />
-              <stop offset="100%" stopColor="#39FF14" stopOpacity={0} />
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity={0.28} />
+              <stop offset="100%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey="label" hide />
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "#6a6a6a", fontFamily: "JetBrains Mono, monospace", fontSize: 10 }}
+            width={36}
+            tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v))}
+          />
+          <XAxis
+            dataKey="label"
+            hide={!showXAxis}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: "#6a6a6a", fontFamily: "JetBrains Mono, monospace", fontSize: 10 }}
+            interval="preserveStartEnd"
+          />
           <Tooltip
             cursor={{ stroke: "#2A2A2A" }}
             contentStyle={{
@@ -27,19 +60,21 @@ export function GrowthAreaChart({ data, height = 180 }: { data: Point[]; height?
               fontSize: 12,
             }}
             labelStyle={{ color: "#A0A0A0" }}
-            itemStyle={{ color: "#39FF14" }}
+            itemStyle={{ color }}
+            formatter={(v: number) => [`${v}${unit ? " " + unit : ""}`, name]}
           />
           <Area
             type="monotone"
             dataKey="v"
-            stroke="#39FF14"
+            name={name}
+            stroke={color}
             strokeWidth={2.5}
-            fill="url(#growthFill)"
+            fill={`url(#${gradientId})`}
             dot={false}
-            activeDot={{ r: 4.5, fill: "#39FF14", stroke: "#39FF14" }}
-            style={{ filter: "drop-shadow(0 0 6px rgba(57,255,20,.5))" }}
+            activeDot={{ r: 4.5, fill: color, stroke: color }}
+            style={{ filter: `drop-shadow(0 0 6px ${glowColor})` }}
             isAnimationActive
-            animationDuration={1200}
+            animationDuration={900}
           />
         </AreaChart>
       </ResponsiveContainer>

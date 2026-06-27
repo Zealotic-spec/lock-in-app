@@ -70,12 +70,7 @@ export default function TasksPage() {
     if (!title.trim()) return;
     sounds.add();
     createTask.mutate(
-      {
-        title: title.trim(),
-        priority,
-        goalId: goalId || null,
-        dueDate: dueDate || null,
-      },
+      { title: title.trim(), priority, goalId: goalId || null, dueDate: dueDate || null },
       {
         onSuccess: () => {
           setTitle("");
@@ -97,7 +92,7 @@ export default function TasksPage() {
   const totalCount = (tasks ?? []).length;
 
   return (
-    <div className="flex flex-col gap-5 max-w-2xl">
+    <div className="flex flex-col gap-5">
       <Card>
         <form onSubmit={handleCreate} className="flex flex-col gap-3">
           <Input
@@ -138,11 +133,7 @@ export default function TasksPage() {
       <div className="flex items-center justify-between">
         <div className="flex gap-1.5">
           {(["active", "done", "all"] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`tag capitalize ${filter === f ? "tag-green" : ""}`}
-            >
+            <button key={f} onClick={() => setFilter(f)} className={`tag capitalize ${filter === f ? "tag-green" : ""}`}>
               {f === "active" ? "To-do" : f === "done" ? "Done" : "All"}
             </button>
           ))}
@@ -174,7 +165,10 @@ export default function TasksPage() {
                 confirmText: "Delete",
                 variant: "danger",
               });
-              if (ok) { sounds.del(); deleteTask.mutate(task.id); }
+              if (ok) {
+                sounds.del();
+                deleteTask.mutate(task.id);
+              }
             }}
           />
         ))}

@@ -1,6 +1,6 @@
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
-export function ProductiveDayChart({ data, height = 160 }: { data: { d: string; v: number }[]; height?: number }) {
+export function ProductiveDayChart({ data, height = 160, interval }: { data: { d: string; v: number }[]; height?: number; interval?: number }) {
   const max = Math.max(0, ...data.map((d) => d.v));
   return (
     <div style={{ height }}>
@@ -10,6 +10,7 @@ export function ProductiveDayChart({ data, height = 160 }: { data: { d: string; 
             dataKey="d"
             axisLine={false}
             tickLine={false}
+            interval={interval ?? "preserveStartEnd"}
             tick={{ fill: "#6a6a6a", fontFamily: "JetBrains Mono, monospace", fontSize: 11 }}
           />
           <Tooltip

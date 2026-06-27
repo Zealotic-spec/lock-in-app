@@ -238,15 +238,39 @@
   }
 
   /* heatmap */
+  .heat-months {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(11px, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .heat-months > div {
+    font-size: 9px;
+    color: #6a6a6a;
+    font-family: JetBrains Mono, monospace;
+    overflow: visible;
+    white-space: nowrap;
+  }
   .heat {
     display: grid;
     grid-auto-flow: column;
-    grid-template-rows: repeat(7, 1fr);
+    grid-template-columns: 12px;
+    grid-auto-columns: minmax(11px, 1fr);
+    grid-template-rows: repeat(7, auto);
     gap: 4px;
   }
+  .heat span {
+    display: flex;
+    align-items: center;
+    font-size: 9px;
+    color: #6a6a6a;
+    font-family: JetBrains Mono, monospace;
+    width: 12px;
+  }
   .heat i {
-    width: 13px;
-    height: 13px;
+    aspect-ratio: 1;
+    min-width: 0;
     border-radius: 3px;
     background: #161616;
     border: 1px solid #1f1f1f;
@@ -268,6 +292,10 @@
     background: var(--color-accent);
     box-shadow: 0 0 7px rgba(57, 255, 20, 0.6);
     border: none;
+  }
+  .heat i[data-today] {
+    outline: 1.5px solid rgba(57, 255, 20, 0.85);
+    outline-offset: 1px;
   }
 
   /* mini bar chart */
